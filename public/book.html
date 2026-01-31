@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment – Standard Hair and Makeup Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body class="landing-print-style">
+  <header class="site-header print-header">
+    <div class="container">
+      <a href="/" class="logo-fallback print-logo">Standard Hair and Makeup Studio</a>
+      <a href="/book" class="nav-link print-nav">Book</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="container narrow">
+        <h1>Book your appointment</h1>
+        <p class="sub" id="page-sub">Bookings open daily at 12:00 AM. You can only book for today – no advance bookings.</p>
+        <div id="booking-status" class="booking-status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- When GOOGLE_FORM_EMBED_URL is set: same as Google Form + Sheets (responses go to your linked Sheet) -->
+    <section id="google-form-section" class="google-form-section" style="display: none;">
+      <div class="container form-container">
+        <div class="form-embed-card">
+          <div class="form-embed-card-accent"></div>
+          <div class="form-embed-card-inner">
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. Complete your details below; responses are saved to our sheet.</p>
+            <div class="form-embed-iframe-wrap">
+              <iframe id="google-form-iframe" title="Book your appointment" class="google-form-iframe"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="booking-form-section" id="custom-form-section">
+      <div class="container form-container">
+        <div class="form-embed-card custom-form-card">
+          <div class="form-embed-card-accent"></div>
+          <div class="form-embed-card-inner">
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. All fields map to your Google Sheet.</p>
+            <form id="booking-form" class="booking-form" novalidate>
+              <div class="form-row">
+                <label for="time">Preferred time <span class="required">*</span></label>
+                <input type="time" id="time" name="time" required />
+              </div>
+              <div class="form-row">
+                <label for="customerName">Full name <span class="required">*</span></label>
+                <input type="text" id="customerName" name="customerName" required placeholder="Your name" />
+              </div>
+              <div class="form-row">
+                <label for="phone">Phone number <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required placeholder="e.g. 07XXX XXXXXX" />
+              </div>
+              <div class="form-row">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="Optional" />
+              </div>
+              <div class="form-row">
+                <label for="service">Primary service <span class="required">*</span></label>
+                <select id="service" name="service" required>
+                  <option value="">Choose a service</option>
+                  <option value="Hair Services (Cut, Color, Styling)">Hair Services (Cut, Color, Styling)</option>
+                  <option value="Beauty Services (Facial, Waxing, Threading)">Beauty Services (Facial, Waxing, Threading)</option>
+                  <option value="Spa/Massage Services">Spa/Massage Services</option>
+                  <option value="Nail Services">Nail Services</option>
+                  <option value="Bridal/Party Makeup">Bridal/Party Makeup</option>
+                  <option value="Haircut and Wash">Haircut and Wash</option>
+                  <option value="Hair Coloring/Highlighting">Hair Coloring/Highlighting</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="source">How did you hear about us?</label>
+                <select id="source" name="source">
+                  <option value="">Select one</option>
+                  <option value="Friend/Family Referral">Friend/Family Referral</option>
+                  <option value="Online Search/Google">Online Search/Google</option>
+                  <option value="Social Media (Instagram/Facebook)">Social Media (Instagram/Facebook)</option>
+                  <option value="Walk-in/Passed By">Walk-in/Passed By</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="notes">Special requests or notes</label>
+                <textarea id="notes" name="notes" rows="2" placeholder="Any preferences or notes"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="submit-btn" class="btn btn-primary">Book appointment</button>
+              </div>
+              <div id="form-message" class="form-message" aria-live="polite"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="info">
+      <div class="container narrow">
+        <p class="info-text">Your booking is saved to our system. We’ll confirm your slot. To change or cancel, please contact us by phone.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; Standard Saloon. Bookings open daily at 12:00 AM.</p>
+      <a href="/">Home</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    (function() {
+      fetch('/api/config')
+        .then(function(r) { return r.json(); })
+        .then(function(config) {
+          if (config.useGoogleForm && config.googleFormEmbedUrl) {
+            document.getElementById('google-form-section').style.display = 'block';
+            document.getElementById('custom-form-section').style.display = 'none';
+            var iframe = document.getElementById('google-form-iframe');
+            iframe.src = config.googleFormEmbedUrl;
+            var sub = document.getElementById('page-sub');
+            if (sub) sub.textContent = 'Fill out the form below. Responses are saved to our sheet, just like Google Form + Sheets.';
+            } else if (config.bookingAlwaysOpen) {
+            var sub = document.getElementById('page-sub');
+            if (sub) sub.textContent = 'Testing mode: bookings are always open. Choose your date, time, and service.';
+          }
+        })
+        .catch(function() {});
+    })();
+  </script>
+</body>
+</html>

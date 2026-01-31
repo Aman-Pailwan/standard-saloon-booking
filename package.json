@@ -1,0 +1,17 @@
+{
+  "name": "standard-saloon",
+  "version": "1.0.0",
+  "description": "Salon appointment website with Google Sheets storage, bookings open at 5 AM daily",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "googleapis": "^144.0.0"
+  }
+}

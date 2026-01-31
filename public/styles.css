@@ -1,0 +1,754 @@
+/* Walmart-inspired theme: blue, yellow, white, clean */
+:root {
+  --walmart-blue: #0071ce;
+  --walmart-blue-dark: #004f9a;
+  --walmart-yellow: #ffc220;
+  --walmart-yellow-dark: #e6a800;
+  --white: #ffffff;
+  --gray-100: #f7f7f7;
+  --gray-200: #e5e5e5;
+  --gray-600: #565656;
+  --gray-800: #333333;
+  --black: #000000;
+  --success: #0071ce;
+  --error: #c41e3a;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--white);
+  color: var(--gray-800);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.container.narrow {
+  max-width: 520px;
+}
+
+/* Header */
+.site-header {
+  background: var(--white);
+  border-bottom: 3px solid var(--walmart-blue);
+  padding: 1rem 0;
+}
+
+.site-header .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--walmart-blue);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.logo:hover {
+  color: var(--walmart-blue-dark);
+}
+
+.nav-link {
+  color: var(--gray-800);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  background: var(--gray-100);
+  color: var(--walmart-blue);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.1s;
+}
+
+.btn-primary {
+  background: var(--walmart-yellow);
+  color: var(--black);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.btn-primary:hover {
+  background: var(--walmart-yellow-dark);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: var(--walmart-blue);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  background: var(--walmart-blue-dark);
+  color: var(--white);
+}
+
+/* ========== LANDING PAGE ========== */
+.landing-hero {
+  background: linear-gradient(135deg, var(--walmart-blue) 0%, var(--walmart-blue-dark) 100%);
+  color: var(--white);
+  padding: 4rem 0 5rem;
+  text-align: center;
+}
+
+.landing-hero h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.landing-hero .tagline {
+  margin: 0 0 2rem;
+  font-size: 1.125rem;
+  opacity: 0.95;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-hero .btn-primary {
+  font-size: 1.125rem;
+  padding: 1rem 2rem;
+  min-width: 200px;
+}
+
+.salon-features {
+  padding: 3rem 0;
+  background: var(--gray-100);
+}
+
+.salon-features h2 {
+  text-align: center;
+  margin: 0 0 2rem;
+  font-size: 1.5rem;
+  color: var(--gray-800);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.feature-card .icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  background: var(--walmart-yellow);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.feature-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--walmart-blue);
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.landing-cta {
+  padding: 3rem 0;
+  text-align: center;
+  background: var(--white);
+}
+
+.landing-cta p {
+  margin: 0 0 1.5rem;
+  font-size: 1.125rem;
+  color: var(--gray-600);
+}
+
+/* ========== STANDARD HAIR AND MAKEUP STUDIO (logo branding) ========== */
+:root {
+  --studio-dark: #1a3328;
+  --studio-dark-bg: #152a21;
+  --studio-teal: #5a9a88;
+  --studio-teal-light: #8fc4b4;
+  --studio-teal-on-dark: #b8ddd0;
+  --studio-cream: #f5f7f6;
+}
+
+.landing-print-style {
+  background: var(--studio-dark-bg);
+  color: var(--studio-teal);
+}
+
+.container-narrow {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Light header so logo and nav are readable */
+.print-header {
+  background: var(--studio-cream);
+  border-bottom: 2px solid var(--studio-teal-light);
+}
+
+.print-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+.logo-fallback.print-logo,
+.print-logo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--studio-dark);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.logo-fallback.print-logo:hover,
+.print-logo:hover {
+  color: var(--studio-teal);
+}
+
+.print-header .print-nav {
+  color: var(--studio-dark);
+  border-color: var(--studio-dark);
+  font-weight: 600;
+}
+
+.print-header .print-nav:hover {
+  color: var(--studio-teal);
+  border-color: var(--studio-teal);
+  background: rgba(26, 51, 40, 0.06);
+}
+
+
+.print-nav {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--studio-dark);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--studio-dark);
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.print-rule {
+  width: 48px;
+  height: 2px;
+  background: var(--studio-teal-on-dark);
+  margin: 1.5rem auto;
+}
+
+.print-rule-top {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.print-rule-bottom {
+  margin-bottom: 0;
+  margin-top: 2rem;
+}
+
+.print-hero {
+  background: var(--studio-dark);
+  padding: 4rem 1.5rem 5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+}
+
+.print-hero .hero-content {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 520px;
+}
+
+.print-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 0.25rem;
+  color: var(--studio-teal-on-dark);
+  line-height: 1.2;
+}
+
+.print-subtitle {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--studio-teal-on-dark);
+  margin: 0 0 0.5rem;
+}
+
+.print-tagline {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--studio-teal-on-dark);
+  margin: 0 auto 2rem;
+  max-width: 420px;
+}
+
+.print-btn {
+  display: inline-block;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--studio-dark);
+  background: var(--studio-teal-on-dark);
+  padding: 0.9rem 2rem;
+  text-decoration: none;
+  border: 2px solid var(--studio-teal-on-dark);
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.print-btn:hover {
+  background: #fff;
+  color: var(--studio-dark);
+  border-color: #fff;
+}
+
+.print-features {
+  padding: 3rem 0;
+  background: var(--studio-cream);
+  text-align: center;
+}
+
+.print-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 1.5rem;
+  color: var(--studio-dark);
+}
+
+.print-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  line-height: 2.2;
+  color: #3d4d47;
+}
+
+.print-services li {
+  letter-spacing: 0.02em;
+}
+
+.print-cta {
+  padding: 3.5rem 0;
+  text-align: center;
+  background: var(--studio-dark);
+}
+
+.print-cta-text {
+  font-size: 1rem;
+  color: var(--studio-teal-on-dark);
+  margin: 0 0 1.25rem;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+.print-footer {
+  background: var(--studio-dark-bg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-top: 2px solid var(--studio-teal-light);
+}
+
+.print-footer .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.print-footer-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--studio-teal-on-dark);
+  margin: 0;
+  font-weight: 500;
+}
+
+.print-footer-link {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--studio-teal-on-dark);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--studio-teal-on-dark);
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.print-footer-link:hover {
+  background: var(--studio-teal-on-dark);
+  color: var(--studio-dark);
+}
+
+/* Book page with studio branding */
+.landing-print-style .page-header {
+  background: var(--studio-cream);
+  border-bottom: 1px solid rgba(26, 51, 40, 0.08);
+}
+
+.landing-print-style .page-header h1 {
+  color: var(--studio-dark);
+}
+
+.landing-print-style .page-header .sub {
+  color: #3d4d47;
+}
+
+.landing-print-style .booking-status.open {
+  background: rgba(143, 196, 180, 0.15);
+  border-color: var(--studio-teal);
+  color: var(--studio-dark);
+}
+
+.landing-print-style .booking-status.closed {
+  background: rgba(26, 51, 40, 0.06);
+  border-color: var(--studio-dark);
+  color: var(--studio-dark);
+}
+
+.landing-print-style .booking-form-section {
+  background: var(--studio-cream);
+}
+
+.landing-print-style .form-embed-card {
+  border-color: rgba(26, 51, 40, 0.12);
+  box-shadow: 0 4px 24px rgba(26, 51, 40, 0.06);
+}
+
+.landing-print-style .form-embed-card-accent {
+  background: linear-gradient(90deg, var(--studio-dark) 0%, var(--studio-teal) 100%);
+}
+
+.landing-print-style .form-embed-intro {
+  color: #3d4d47;
+}
+
+.landing-print-style .info {
+  border-top-color: rgba(26, 51, 40, 0.08);
+}
+
+.landing-print-style .info-text {
+  color: #3d4d47;
+}
+
+/* ========== BOOKING PAGE ========== */
+.page-header {
+  background: var(--gray-100);
+  padding: 2rem 0 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.page-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  color: var(--gray-800);
+}
+
+.page-header .sub {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--gray-600);
+}
+
+.booking-status {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.booking-status.open {
+  background: #e8f4fc;
+  border: 1px solid var(--walmart-blue);
+  color: var(--walmart-blue-dark);
+}
+
+.booking-status.closed {
+  background: #fff8e6;
+  border: 1px solid var(--walmart-yellow-dark);
+  color: var(--gray-800);
+}
+
+/* Embedded Google Form (same as Form + Sheets) */
+/* Embedded Google Form – branded wrapper so it doesn’t look “raw” */
+.google-form-section {
+  padding: 0 0 3rem;
+  background: linear-gradient(180deg, var(--gray-100) 0%, var(--white) 12%);
+}
+
+.form-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.form-embed-card {
+  position: relative;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 113, 206, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+.form-embed-card-accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--walmart-blue) 0%, var(--walmart-blue-dark) 50%, var(--walmart-yellow) 100%);
+}
+
+.form-embed-card-inner {
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.form-embed-intro {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  color: var(--gray-600);
+  font-weight: 500;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.form-embed-iframe-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+.google-form-iframe {
+  display: block;
+  width: 100%;
+  height: 1400px;
+  min-height: 900px;
+  border: none;
+  background: var(--white);
+}
+
+@media (max-width: 640px) {
+  .form-embed-card-inner {
+    padding: 1rem 1rem 0.5rem;
+  }
+  .form-embed-intro {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .google-form-iframe {
+    height: 1200px;
+    min-height: 700px;
+  }
+}
+
+.booking-form-section {
+  padding: 0 0 3rem;
+  background: linear-gradient(180deg, var(--gray-100) 0%, var(--white) 12%);
+}
+
+.custom-form-card .form-embed-intro {
+  margin-bottom: 1.25rem;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--gray-800);
+}
+
+.required {
+  color: var(--error);
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--gray-800);
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  outline: none;
+  border-color: var(--walmart-blue);
+}
+
+.form-row input::placeholder,
+.form-row textarea::placeholder {
+  color: var(--gray-600);
+}
+
+.form-row textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.form-actions {
+  padding-top: 0.5rem;
+}
+
+.form-actions .btn-primary {
+  width: 100%;
+  padding: 1rem;
+}
+
+.form-actions .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.form-message {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0;
+  font-size: 0.9rem;
+  min-height: 1.5em;
+  font-weight: 500;
+}
+
+.form-message.success {
+  color: var(--walmart-blue-dark);
+}
+
+.form-message.error {
+  color: var(--error);
+}
+
+.info {
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.info-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+/* Footer */
+.site-footer {
+  padding: 1.25rem 0;
+  border-top: 3px solid var(--walmart-blue);
+  background: var(--gray-100);
+}
+
+.site-footer .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+
+.site-footer a {
+  color: var(--walmart-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
