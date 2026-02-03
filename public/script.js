@@ -41,7 +41,6 @@
     if (submitBtn) submitBtn.disabled = true;
 
     const payload = {
-      time: form.time.value,
       customerName: form.customerName.value.trim(),
       phone: form.phone.value.trim(),
       email: form.email.value.trim(),
@@ -59,7 +58,17 @@
       const data = await res.json();
 
       if (data.success) {
-        showMessage(data.message || 'Your appointment has been booked.', 'success');
+        let msg = data.message || 'Your appointment has been booked.';
+        if (data.bookedAt) {
+          const d = new Date(data.bookedAt);
+          const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+          const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
+          msg += '\nForm submitted at ' + timeStr + ' IST, ' + dateStr + '.';
+        }
+        if (data.queueNumber != null) {
+          msg += '\nYour number in the queue: #' + data.queueNumber + ' for today.';
+        }
+        showMessage(msg, 'success');
         form.reset();
         setMinDate();
         fetchBookingStatus();

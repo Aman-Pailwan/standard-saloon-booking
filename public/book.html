@@ -46,15 +46,12 @@
 
     <section class="booking-form-section" id="custom-form-section">
       <div class="container form-container">
-        <div class="form-embed-card custom-form-card">
+        <div class="form-embed-card custom-form-card booking-form-card">
           <div class="form-embed-card-accent"></div>
           <div class="form-embed-card-inner">
-            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. All fields map to your Google Sheet.</p>
+            <h2 class="booking-form-title">Book your visit</h2>
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. We’ll save your details and confirm your slot.</p>
             <form id="booking-form" class="booking-form" novalidate>
-              <div class="form-row">
-                <label for="time">Preferred time <span class="required">*</span></label>
-                <input type="time" id="time" name="time" required />
-              </div>
               <div class="form-row">
                 <label for="customerName">Full name <span class="required">*</span></label>
                 <input type="text" id="customerName" name="customerName" required placeholder="Your name" />
@@ -97,9 +94,9 @@
                 <textarea id="notes" name="notes" rows="2" placeholder="Any preferences or notes"></textarea>
               </div>
               <div class="form-actions">
-                <button type="submit" id="submit-btn" class="btn btn-primary">Book appointment</button>
+                <button type="submit" id="submit-btn" class="btn btn-primary btn-book">Book appointment</button>
               </div>
-              <div id="form-message" class="form-message" aria-live="polite"></div>
+              <div id="form-message" class="form-message booking-form-message" aria-live="polite"></div>
             </form>
           </div>
         </div>
@@ -113,10 +110,10 @@
     </section>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer print-footer">
     <div class="container">
-      <p>&copy; Standard Saloon. Bookings open daily at 12:00 AM.</p>
-      <a href="/">Home</a>
+      <p class="print-footer-text">&copy; Standard Hair and Makeup Studio. Bookings open daily at 12:00 AM.</p>
+      <a href="/" class="print-footer-link">Home</a>
     </div>
   </footer>
 

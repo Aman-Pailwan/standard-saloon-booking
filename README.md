@@ -9,6 +9,7 @@ A salon booking site with a **Walmart-inspired** UI. You can use it **the same w
 - **Google Form + Sheets** – Create a Form, link to a Sheet; responses go to the Sheet like normal
 - **12:00 AM rule** – (Custom form only) Submissions accepted from 12:00 AM (midnight) daily; with Google Form you control when the form is open
 - **Daily sheet tabs** – (Custom form + API) One new tab per day in the same spreadsheet (tab name = `YYYY-MM-DD`)
+- **Email queue number** – (Custom form) Optionally email the customer their queue number; see [docs/EMAIL-QUEUE-NUMBER.md](docs/EMAIL-QUEUE-NUMBER.md)
 - **Testing** – Set `BOOKING_ALWAYS_OPEN=true` to keep bookings open at any time
 
 ## Setup
@@ -23,6 +24,9 @@ npm start
 Then open **http://localhost:3000** → **Book now**. Responses go to the Sheet linked to your form.
 
 **Step-by-step Google Form + Sheet setup:** see **[docs/GOOGLE-SETUP.md](docs/GOOGLE-SETUP.md)**.
+
+**Custom method (our form + queue number on site):** see **[docs/CUSTOM-METHOD-SETUP.md](docs/CUSTOM-METHOD-SETUP.md)**.  
+**Step-by-step: create Google Cloud project + service account:** see **[docs/GOOGLE-CLOUD-STEPS.md](docs/GOOGLE-CLOUD-STEPS.md)**.
 
 **How to host online:** see **[docs/HOSTING.md](docs/HOSTING.md)** (Render, Railway, Fly.io).
 
