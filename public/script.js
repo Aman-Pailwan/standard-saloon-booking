@@ -50,12 +50,17 @@
     };
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(function () { controller.abort(); }, 30000);
       const res = await fetch('/api/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
-      const data = await res.json();
+      clearTimeout(timeoutId);
+      const contentType = res.headers.get('Content-Type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : { success: false, error: 'Server returned an invalid response. Try again or check /api/check.' };
 
       if (data.success) {
         let msg = data.message || 'Your appointment has been booked.';
@@ -75,8 +80,12 @@
       } else {
         showMessage(data.error || 'Booking failed. Please try again.', 'error');
       }
-    } catch (_) {
-      showMessage('Network error. Please try again.', 'error');
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        showMessage('Request timed out. The server may be starting up (e.g. on Render). Try again in a minute, or check /api/check.', 'error');
+      } else {
+        showMessage('Network error. Please try again. If deployed, check /api/check to verify credentials.', 'error');
+      }
     } finally {
       if (submitBtn) submitBtn.disabled = false;
     }

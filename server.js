@@ -241,7 +241,6 @@ async function sendBookingConfirmationEmail(customerEmail, queueNumber, customer
 }
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 function isBookingWindowOpen() {
   if (BOOKING_ALWAYS_OPEN) return true;
@@ -279,6 +278,38 @@ app.get('/api/booking-status', (req, res) => {
     nextOpening: getNextOpeningTime().toISOString(),
   });
 });
+
+/** Check credentials and spreadsheet access – open /api/check in browser to confirm setup */
+app.get('/api/check', async (req, res) => {
+  const out = { ok: false, spreadsheetId: !!SPREADSHEET_ID, credentials: false, sheetAccess: false, error: null };
+  if (!SPREADSHEET_ID) {
+    out.error = 'GOOGLE_SPREADSHEET_ID is not set. Set it in Environment (Render) or in your shell.';
+    return res.json(out);
+  }
+  let sheets;
+  try {
+    sheets = getSheetsClient();
+    out.credentials = true;
+  } catch (err) {
+    out.error = 'Credentials failed: ' + (err.message || String(err));
+    return res.json(out);
+  }
+  try {
+    await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+    out.sheetAccess = true;
+    out.ok = true;
+  } catch (err) {
+    out.error = 'Sheet access failed: ' + (err.message || String(err));
+    if (err.code === 403 || (err.message && err.message.toLowerCase().includes('permission'))) {
+      out.error = 'Sheet not shared with service account. Share your Google Sheet with the client_email from your credentials as Editor.';
+    } else if (err.code === 404) {
+      out.error = 'Spreadsheet not found. Check GOOGLE_SPREADSHEET_ID (the ID from the sheet URL).';
+    }
+  }
+  res.json(out);
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/book', async (req, res) => {
   if (GOOGLE_FORM_EMBED_URL) {
