@@ -19,21 +19,42 @@ const BOOKING_ALWAYS_OPEN = process.env.BOOKING_ALWAYS_OPEN === 'true' || proces
 // Create a new sheet tab per day in the same spreadsheet (tab name = YYYY-MM-DD)
 const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 
-// Optional: send email to customer with queue number (set SEND_BOOKING_EMAIL=true and SMTP_* env vars)
+// Optional: send email to customer with queue number
+// On Render free tier: use SENDGRID_API_KEY (SMTP ports 587/465 are blocked). Locally: SMTP (Gmail) works.
 const SEND_BOOKING_EMAIL = process.env.SEND_BOOKING_EMAIL === 'true' || process.env.SEND_BOOKING_EMAIL === '1';
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587', 10);
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Standard Hair and Makeup Studio';
-const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || SMTP_USER;
+const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || process.env.SENDGRID_FROM_EMAIL || SMTP_USER;
+
+const TIMEZONE_IST = 'Asia/Kolkata';
+
+/** Current date in IST as YYYY-MM-DD (for sheet tab and booking date when server is in another region) */
+function getISTDateString() {
+  const parts = new Date().toLocaleString('en-IN', { timeZone: TIMEZONE_IST, year: 'numeric', month: '2-digit', day: '2-digit' }).split('/');
+  const [d, m, y] = parts;
+  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
+
+/** Current hour (0–23) and minute in IST */
+function getISTTime() {
+  const str = new Date().toLocaleString('en-IN', { timeZone: TIMEZONE_IST, hour: '2-digit', minute: '2-digit', hour12: false });
+  const [hour, minute] = str.split(':').map((n) => parseInt(n, 10));
+  return { hour: hour || 0, minute: minute || 0 };
+}
 
 function getSheetNameForDate(date) {
-  const d = date ? new Date(date) : new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  if (date) {
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return getISTDateString();
 }
 
 /** Format a date as IST for display in the sheet (e.g. "31/1/2025, 3:45:00 pm IST") */
@@ -208,13 +229,54 @@ function getBookingEmailHtml(customerName, queueNumber) {
 </html>`;
 }
 
-/** Send optional email to customer with queue number. Does not throw; logs errors. */
+/** Send optional email to customer with queue number. Uses SendGrid API if SENDGRID_API_KEY set (works on Render free tier); else SMTP. Does not throw; logs errors. */
 async function sendBookingConfirmationEmail(customerEmail, queueNumber, customerName) {
   if (!SEND_BOOKING_EMAIL || !customerEmail || !queueNumber) return;
   const email = (customerEmail || '').trim();
   if (!email || email.indexOf('@') === -1) return;
+
+  const name = (customerName || 'Customer').trim() || 'Customer';
+  const subject = 'Your booking – you are #' + queueNumber + ' in the queue';
+  const text = `Hi ${name},\n\nThank you for your booking.\n\nYou are #${queueNumber} in the queue for today.\n\n– Standard Hair and Makeup Studio`;
+  const html = getBookingEmailHtml(name, queueNumber);
+  const fromAddr = EMAIL_FROM_ADDRESS || SMTP_USER;
+  if (!fromAddr || fromAddr.indexOf('@') === -1) {
+    console.warn('Email not sent: set EMAIL_FROM_ADDRESS or SENDGRID_FROM_EMAIL (or SMTP_USER for SMTP).');
+    return;
+  }
+
+  if (SENDGRID_API_KEY) {
+    try {
+      const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + SENDGRID_API_KEY,
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email }] }],
+          from: { email: fromAddr, name: EMAIL_FROM_NAME },
+          subject,
+          content: [
+            { type: 'text/plain', value: text },
+            { type: 'text/html', value: html },
+          ],
+        }),
+      });
+      if (res.ok) {
+        console.log('Confirmation email sent to', email, '(queue #' + queueNumber + ') via SendGrid');
+      } else {
+        const errText = await res.text();
+        console.error('SendGrid error:', res.status, errText);
+      }
+    } catch (err) {
+      console.error('Booking confirmation email error (SendGrid):', err.message);
+    }
+    return;
+  }
+
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    console.warn('Email not sent: set SMTP_HOST, SMTP_USER, SMTP_PASS to send booking emails.');
+    console.warn('Email not sent: set SENDGRID_API_KEY (recommended on Render) or SMTP_HOST, SMTP_USER, SMTP_PASS.');
     return;
   }
   try {
@@ -224,17 +286,14 @@ async function sendBookingConfirmationEmail(customerEmail, queueNumber, customer
       secure: SMTP_PORT === 465,
       auth: { user: SMTP_USER, pass: SMTP_PASS },
     });
-    const name = (customerName || 'Customer').trim() || 'Customer';
-    const subject = 'Your booking – you are #' + queueNumber + ' in the queue';
-    const text = `Hi ${name},\n\nThank you for your booking.\n\nYou are #${queueNumber} in the queue for today.\n\n– Standard Hair and Makeup Studio`;
-    const html = getBookingEmailHtml(name, queueNumber);
     await transporter.sendMail({
-      from: `"${EMAIL_FROM_NAME}" <${EMAIL_FROM_ADDRESS}>`,
+      from: `"${EMAIL_FROM_NAME}" <${fromAddr}>`,
       to: email,
       subject,
       text,
       html,
     });
+    console.log('Confirmation email sent to', email, '(queue #' + queueNumber + ')');
   } catch (err) {
     console.error('Booking confirmation email error:', err.message);
   }
@@ -244,21 +303,19 @@ app.use(express.json());
 
 function isBookingWindowOpen() {
   if (BOOKING_ALWAYS_OPEN) return true;
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  // Bookings open only at 12:00 AM (midnight)
+  const { hour, minute } = getISTTime();
+  // Bookings open at 12:00 AM IST (midnight India time), regardless of server region
   return hour > 0 || (hour === 0 && minute >= 0);
 }
 
 function getNextOpeningTime() {
-  const now = new Date();
-  const next = new Date(now);
-  if (now.getHours() > 0 || (now.getHours() === 0 && now.getMinutes() > 0)) {
-    next.setDate(next.getDate() + 1);
-  }
-  next.setHours(0, 0, 0, 0);
-  return next;
+  const { hour, minute } = getISTTime();
+  const istToday = getISTDateString();
+  const [y, m, d] = istToday.split('-').map((n) => parseInt(n, 10));
+  const tomorrow = new Date(y, m - 1, d + 1);
+  const tomorrowStr = tomorrow.getFullYear() + '-' + String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' + String(tomorrow.getDate()).padStart(2, '0');
+  const nextDateStr = hour > 0 || (hour === 0 && minute > 0) ? tomorrowStr : istToday;
+  return new Date(nextDateStr + 'T00:00:00+05:30');
 }
 
 // Tell frontend whether to show embedded Google Form or our custom form
@@ -337,8 +394,8 @@ app.post('/api/book', async (req, res) => {
     });
   }
 
-  // Bookings are for today only – no advance bookings
-  const today = new Date().toISOString().slice(0, 10);
+  // Bookings are for today only (use IST date so US-hosted server uses Indian day)
+  const today = getISTDateString();
 
   try {
     const queueNumber = await appendBookingToSheet({
@@ -351,8 +408,6 @@ app.post('/api/book', async (req, res) => {
       source: (source || '').trim(),
       notes: (notes || '').trim(),
     });
-    // Optional: email customer with queue number
-    await sendBookingConfirmationEmail(email, queueNumber, customerName);
 
     const bookedAt = new Date().toISOString();
     res.json({
@@ -361,6 +416,11 @@ app.post('/api/book', async (req, res) => {
       queueNumber,
       bookedAt,
     });
+
+    // Send confirmation email in background so response is not delayed (avoids timeout on Render)
+    sendBookingConfirmationEmail(email, queueNumber, customerName).catch((err) =>
+      console.error('Booking confirmation email error:', err.message)
+    );
   } catch (err) {
     console.error('Google Sheets error:', err.message || err);
     let userMessage = err.message || 'Failed to save booking.';

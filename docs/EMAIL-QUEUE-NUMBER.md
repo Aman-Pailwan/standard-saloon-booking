@@ -7,19 +7,84 @@ The app can send an email to the customer after they book, with their **queue nu
 - Only if the customer **enters an email** in the booking form (email is optional).
 - Only if you turn it on with env vars (see below).
 
+---
+
+## Render free tier: use SendGrid (not Gmail SMTP)
+
+**On Render free tier, outbound SMTP ports (587, 465) are blocked**, so Gmail SMTP will not send. Use **SendGrid** instead (HTTPS API works on free tier; ~100 emails/day free).
+
+| Option | Where it works |
+|--------|-----------------|
+| **SENDGRID_API_KEY** | Render (and anywhere). Recommended for production. |
+| **SMTP (Gmail)** | Local only, or a paid host that allows SMTP. |
+
+---
+
 ## Enable it
 
-Set these **environment variables** (e.g. in Render → Environment, or in your shell):
+| Variable | When | Description |
+|----------|------|-------------|
+| **SEND_BOOKING_EMAIL** | Always | `true` or `1` to enable. |
+| **SENDGRID_API_KEY** | Render / production | SendGrid API key. App sends via HTTPS. |
+| **SENDGRID_FROM_EMAIL** | With SendGrid | From address (must be verified in SendGrid). |
+| **SMTP_HOST** | Local | e.g. `smtp.gmail.com`. |
+| **SMTP_PORT** | SMTP | Default `587`. |
+| **SMTP_USER** | SMTP | Your email. |
+| **SMTP_PASS** | SMTP | App password. |
+| **EMAIL_FROM_NAME** | Optional | Default: "Standard Hair and Makeup Studio". |
+| **EMAIL_FROM_ADDRESS** | Optional | Default: SENDGRID_FROM_EMAIL or SMTP_USER. |
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| **SEND_BOOKING_EMAIL** | Yes | Set to `true` or `1` to enable. |
-| **SMTP_HOST** | Yes | Your SMTP server (e.g. `smtp.gmail.com`). |
-| **SMTP_PORT** | No | Default `587`. Use `465` for SSL. |
-| **SMTP_USER** | Yes | SMTP login (usually your email). |
-| **SMTP_PASS** | Yes | SMTP password or app password. |
-| **EMAIL_FROM_NAME** | No | Default: "Standard Hair and Makeup Studio". |
-| **EMAIL_FROM_ADDRESS** | No | Default: same as SMTP_USER. |
+### SendGrid free – step-by-step
+
+**Step 1: Create a SendGrid account**
+
+1. Go to [sendgrid.com](https://sendgrid.com).
+2. Click **Start for free** or **Sign up**.
+3. Create an account (email + password). Free plan gives ~100 emails/day.
+
+**Step 2: Verify your identity (one-time)**
+
+1. After login, SendGrid may ask you to verify your email – check inbox and click the link.
+2. You may be asked to complete a short “Tell us about yourself” form. Fill it and continue.
+
+**Step 3: Create an API key**
+
+1. In the left sidebar, go to **Settings** → **API Keys** (or [SendGrid API Keys](https://app.sendgrid.com/settings/api_keys)).
+2. Click **Create API Key**.
+3. **Name:** e.g. `Salon booking`.
+4. **API Key Permissions:** choose **Restricted Access**. Under **Mail Send**, turn **ON** only **Mail Send** (full access for that). Leave others off.
+5. Click **Create & View**. **Copy the key immediately** (it starts with `SG.`) – SendGrid will not show it again. Save it somewhere safe (e.g. a password manager or a note you’ll paste into Render).
+
+**Step 4: Verify a sender (so SendGrid can send “from” your email)**
+
+1. In the left sidebar, go to **Settings** → **Sender Authentication** (or [Sender Authentication](https://app.sendgrid.com/settings/sender_auth)).
+2. Under **Single Sender Verification**, click **Create New Sender** (or **Verify a Single Sender**).
+3. Fill in:
+   - **From Name:** e.g. `Standard Hair and Makeup Studio`
+   - **From Email Address:** the Gmail (or email) you want to send from, e.g. `saloonstandard92@gmail.com`
+   - **Reply To:** same or your support email
+   - **Company / Address:** optional
+4. Click **Create**. SendGrid will send a verification email to that address.
+5. Open your inbox, click the verification link in SendGrid’s email. Once verified, that address can be used as **From**.
+
+**Step 5: Add env vars on Render**
+
+1. Open [Render Dashboard](https://dashboard.render.com) → your **Web Service** (the salon booking app).
+2. Go to **Environment** (left sidebar).
+3. Add or edit:
+   - **Key:** `SEND_BOOKING_EMAIL` → **Value:** `true`
+   - **Key:** `SENDGRID_API_KEY` → **Value:** paste your API key (e.g. `SG.xxxx...`). Mark as **Secret** if you want.
+   - **Key:** `SENDGRID_FROM_EMAIL` → **Value:** the **exact** email you verified in Step 4 (e.g. `saloonstandard92@gmail.com`)
+4. Click **Save Changes**.
+
+**Step 6: Redeploy**
+
+1. Go to **Manual Deploy** → **Deploy latest commit** (or push a new commit so auto-deploy runs).
+2. Wait until the deploy is **Live**.
+
+After this, when a customer books and enters an email, the app will send the queue-number email via SendGrid and it should arrive in their inbox. If it doesn’t, check Render **Logs** for `Confirmation email sent to ... via SendGrid` or any SendGrid error message.
+
+### Gmail SMTP (local only)
 
 Example (local):
 
