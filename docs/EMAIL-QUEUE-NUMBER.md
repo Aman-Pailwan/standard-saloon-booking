@@ -2,6 +2,8 @@
 
 The app can send an email to the customer after they book, with their **queue number** in the subject and body.
 
+**Emails going to spam?** See **[docs/EMAIL-NOT-SPAM.md](EMAIL-NOT-SPAM.md)** for what you can do (domain authentication, content, etc.).
+
 ## When it runs
 
 - Only if the customer **enters an email** in the booking form (email is optional).

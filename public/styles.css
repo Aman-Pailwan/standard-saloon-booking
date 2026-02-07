@@ -21,6 +21,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -29,6 +33,12 @@ body {
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--studio-teal, #5a9a88);
+  outline-offset: 2px;
 }
 
 .container {
@@ -250,17 +260,25 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
+  gap: 1rem;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logo-fallback.print-logo,
 .print-logo {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
   font-weight: 600;
   color: var(--studio-dark);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .logo-fallback.print-logo:hover,
@@ -289,10 +307,18 @@ body {
   text-transform: uppercase;
   color: var(--studio-dark);
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid var(--studio-dark);
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.print-nav:hover {
+  transform: translateY(-1px);
 }
 
 .print-rule {
@@ -313,13 +339,13 @@ body {
 }
 
 .print-hero {
-  background: var(--studio-dark);
-  padding: 4rem 1.5rem 5rem;
+  background: linear-gradient(160deg, var(--studio-dark) 0%, #1e3d32 50%, var(--studio-dark-bg) 100%);
+  padding: 4.5rem 1.5rem 5.5rem;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 380px;
+  min-height: 400px;
 }
 
 .print-hero .hero-content {
@@ -361,23 +387,36 @@ body {
 .print-btn {
   display: inline-block;
   font-family: 'Libre Franklin', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--studio-dark);
   background: var(--studio-teal-on-dark);
-  padding: 0.9rem 2rem;
+  padding: 1rem 2.25rem;
+  min-height: 48px;
   text-decoration: none;
   border: 2px solid var(--studio-teal-on-dark);
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  border-radius: 10px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .print-btn:hover {
   background: #fff;
   color: var(--studio-dark);
   border-color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.hero-cta-btn {
+  padding: 1.1rem 2.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.hero-cta-btn:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .print-features {
@@ -409,18 +448,103 @@ body {
   letter-spacing: 0.02em;
 }
 
+.print-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem 2rem;
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.print-services-grid li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+}
+
+.service-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--studio-teal);
+  flex-shrink: 0;
+}
+
 .print-cta {
-  padding: 3.5rem 0;
+  padding: 4rem 0;
   text-align: center;
-  background: var(--studio-dark);
+  background: linear-gradient(180deg, var(--studio-dark) 0%, var(--studio-dark-bg) 100%);
 }
 
 .print-cta-text {
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--studio-teal-on-dark);
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   letter-spacing: 0.02em;
   font-weight: 500;
+}
+
+.print-cta-link {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--studio-teal-on-dark);
+  text-decoration: none;
+  border-bottom: 2px solid var(--studio-teal-on-dark);
+  padding-bottom: 0.2rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.print-cta-link:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.print-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+}
+
+.print-footer .footer-links .print-footer-link {
+  margin: 0;
+}
+
+.footer-credit {
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #1a3328;
+}
+
+.footer-credit strong {
+  font-weight: 600;
+  color: #1a3328;
+}
+
+/* Dark footer: use light text so credit is visible */
+.print-footer .footer-credit {
+  color: var(--studio-teal-on-dark);
+}
+
+.print-footer .footer-credit strong {
+  color: #fff;
+}
+
+/* Light footer (e.g. book page): keep dark text so credit is visible */
+.site-footer.print-footer .footer-credit {
+  color: #1a3328;
+}
+
+.site-footer.print-footer .footer-credit strong {
+  color: #1a3328;
 }
 
 .print-footer {
@@ -453,18 +577,31 @@ body {
   color: var(--studio-teal-on-dark);
   text-decoration: none;
   font-weight: 600;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid var(--studio-teal-on-dark);
-  border-radius: 4px;
-  transition: background 0.2s, color 0.2s;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
 }
 
 .print-footer-link:hover {
   background: var(--studio-teal-on-dark);
   color: var(--studio-dark);
+  transform: translateY(-1px);
 }
 
 /* Book page with studio branding */
+.book-page-header {
+  padding: 2.5rem 0 2rem;
+}
+
+.page-header-inner {
+  padding: 0 0.25rem;
+}
+
 .landing-print-style .page-header {
   background: var(--studio-cream);
   border-bottom: 1px solid rgba(26, 51, 40, 0.08);
@@ -473,16 +610,28 @@ body {
 
 .landing-print-style .page-header h1 {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.85rem;
+  font-size: clamp(1.6rem, 4vw, 1.95rem);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--studio-dark);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.25;
 }
 
 .landing-print-style .page-header .sub {
   color: #3d4d47;
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.landing-print-style .booking-status {
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border-width: 2px;
+  font-weight: 500;
 }
 
 .landing-print-style .booking-status.open {
@@ -494,6 +643,12 @@ body {
 .landing-print-style .booking-status.closed {
   background: rgba(26, 51, 40, 0.06);
   border-color: var(--studio-dark);
+  color: var(--studio-dark);
+}
+
+.landing-print-style .booking-status.full {
+  background: rgba(140, 100, 60, 0.12);
+  border-color: #8c643c;
   color: var(--studio-dark);
 }
 
@@ -579,6 +734,17 @@ body {
   color: #6b7c76;
 }
 
+.form-field-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7c76;
+  line-height: 1.4;
+}
+
+.landing-print-style .form-field-hint {
+  color: #5a6b65;
+}
+
 .landing-print-style .booking-form .form-row select {
   cursor: pointer;
   appearance: none;
@@ -649,12 +815,74 @@ body {
   padding: 2rem 0 2.5rem;
 }
 
+.info-card-section .info-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(90, 154, 136, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(26, 51, 40, 0.04);
+}
+
 .landing-print-style .info-text {
   color: #3d4d47;
   font-size: 0.95rem;
-  max-width: 480px;
-  margin: 0 auto;
+  margin: 0;
   text-align: center;
+  line-height: 1.55;
+}
+
+/* Locate us page */
+.locate-section {
+  padding: 0 0 4rem;
+  background: var(--studio-cream);
+}
+
+.locate-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(90, 154, 136, 0.2);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(26, 51, 40, 0.06);
+}
+
+.locate-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--studio-dark);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.02em;
+}
+
+.locate-btn {
+  display: inline-block;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(180deg, var(--studio-teal) 0%, #4a8572 100%);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(90, 154, 136, 0.35);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.locate-btn:hover {
+  background: linear-gradient(180deg, var(--studio-teal-light) 0%, var(--studio-teal) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(90, 154, 136, 0.4);
+}
+
+.locate-hint {
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7c76;
 }
 
 /* Book page footer already uses print-footer; ensure spacing */
@@ -668,6 +896,20 @@ body {
   }
   .booking-form-title {
     font-size: 1.5rem;
+  }
+  .print-hero {
+    padding: 3rem 1rem 4rem;
+    min-height: 360px;
+  }
+  .print-services-grid {
+    grid-template-columns: 1fr;
+    max-width: 280px;
+  }
+  .book-page-header {
+    padding: 1.75rem 0 1.5rem;
+  }
+  .info-card-section .info-card {
+    padding: 1.25rem 1.25rem;
   }
 }
 
@@ -705,9 +947,10 @@ body {
 
 .booking-status {
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 0.9rem;
   margin-top: 1rem;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .booking-status.open {
@@ -719,6 +962,12 @@ body {
 .booking-status.closed {
   background: #fff8e6;
   border: 1px solid var(--walmart-yellow-dark);
+  color: var(--gray-800);
+}
+
+.booking-status.full {
+  background: #f5ebe0;
+  border: 1px solid #b8860b;
   color: var(--gray-800);
 }
 

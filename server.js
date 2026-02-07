@@ -19,6 +19,9 @@ const BOOKING_ALWAYS_OPEN = process.env.BOOKING_ALWAYS_OPEN === 'true' || proces
 // Create a new sheet tab per day in the same spreadsheet (tab name = YYYY-MM-DD)
 const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 
+// Max bookings per day; once reached, no more accepted until next day (12:00 AM IST)
+const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '20', 10) || 20;
+
 // Optional: send email to customer with queue number
 // On Render free tier: use SENDGRID_API_KEY (SMTP ports 587/465 are blocked). Locally: SMTP (Gmail) works.
 const SEND_BOOKING_EMAIL = process.env.SEND_BOOKING_EMAIL === 'true' || process.env.SEND_BOOKING_EMAIL === '1';
@@ -55,6 +58,27 @@ function getSheetNameForDate(date) {
     return `${y}-${m}-${day}`;
   }
   return getISTDateString();
+}
+
+/** Get today's booking count (data rows only) for the daily sheet. Returns 0 if no sheet or error. */
+async function getTodayBookingCount() {
+  if (!SPREADSHEET_ID) return 0;
+  try {
+    const sheets = getSheetsClient();
+    const tabName = USE_DAILY_SHEETS ? getISTDateString() : SHEET_NAME;
+    const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+    const existingTitles = (meta.data.sheets || []).map(s => s.properties.title);
+    if (!existingTitles.includes(tabName)) return 0;
+    const countRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${tabName}!A:A`,
+    });
+    const rows = countRes.data.values || [];
+    const dataRowCount = rows.length <= 1 ? 0 : rows.length - 1;
+    return dataRowCount;
+  } catch (_) {
+    return 0;
+  }
 }
 
 /** Format a date as IST for display in the sheet (e.g. "31/1/2025, 3:45:00 pm IST") */
@@ -153,16 +177,23 @@ async function appendBookingToSheet(booking) {
 
   // Get current row count for queue number (data rows only, excluding header)
   let queueNumber = 1;
+  let dataRowCount = 0;
   try {
     const countRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${tabName}!A:A`,
     });
     const rows = countRes.data.values || [];
-    const dataRowCount = rows.length <= 1 ? 0 : rows.length - 1; // subtract header
+    dataRowCount = rows.length <= 1 ? 0 : rows.length - 1; // subtract header
     queueNumber = dataRowCount + 1;
   } catch (_) {
     queueNumber = 1;
+  }
+
+  if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
+    const err = new Error('We\'re done for today. All ' + MAX_BOOKINGS_PER_DAY + ' slots are filled. Bookings open again at 12:00 AM tomorrow.');
+    err.code = 'DAILY_LIMIT_REACHED';
+    throw err;
   }
 
   await sheets.spreadsheets.values.append({
@@ -256,6 +287,7 @@ async function sendBookingConfirmationEmail(customerEmail, queueNumber, customer
         body: JSON.stringify({
           personalizations: [{ to: [{ email }] }],
           from: { email: fromAddr, name: EMAIL_FROM_NAME },
+          reply_to: fromAddr ? { email: fromAddr, name: EMAIL_FROM_NAME } : undefined,
           subject,
           content: [
             { type: 'text/plain', value: text },
@@ -327,11 +359,27 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-app.get('/api/booking-status', (req, res) => {
-  const open = isBookingWindowOpen();
+app.get('/api/booking-status', async (req, res) => {
+  const windowOpen = isBookingWindowOpen();
+  const currentBookingsToday = await getTodayBookingCount();
+  const slotsFull = currentBookingsToday >= MAX_BOOKINGS_PER_DAY;
+  const open = windowOpen && !slotsFull;
+
+  let message;
+  if (slotsFull) {
+    message = "We're done for today. All " + MAX_BOOKINGS_PER_DAY + " slots are filled. Bookings open again at 12:00 AM tomorrow.";
+  } else if (windowOpen) {
+    message = currentBookingsToday + '/' + MAX_BOOKINGS_PER_DAY + ' slots filled for today. You can submit your appointment below.';
+  } else {
+    message = 'Bookings open daily at 12:00 AM (midnight) IST. You can fill the form, but submission will be accepted after midnight.';
+  }
+
   res.json({
     open,
-    message: open ? 'Bookings are open.' : 'Bookings open daily at 12:00 AM (midnight).',
+    currentBookingsToday,
+    maxBookingsPerDay: MAX_BOOKINGS_PER_DAY,
+    slotsFull,
+    message,
     nextOpening: getNextOpeningTime().toISOString(),
   });
 });
@@ -381,8 +429,17 @@ app.post('/api/book', async (req, res) => {
   if (!isBookingWindowOpen()) {
     return res.status(403).json({
       success: false,
-      error: 'Bookings open daily at 12:00 AM (midnight). Please try again then.',
+      error: 'Bookings open daily at 12:00 AM (midnight) IST. Please try again then.',
       nextOpening: getNextOpeningTime().toISOString(),
+    });
+  }
+
+  const currentCount = await getTodayBookingCount();
+  if (currentCount >= MAX_BOOKINGS_PER_DAY) {
+    return res.status(403).json({
+      success: false,
+      error: "We're done for today. All " + MAX_BOOKINGS_PER_DAY + " slots are filled. Bookings open again at 12:00 AM tomorrow.",
+      slotsFull: true,
     });
   }
 
@@ -423,6 +480,13 @@ app.post('/api/book', async (req, res) => {
     );
   } catch (err) {
     console.error('Google Sheets error:', err.message || err);
+    if (err.code === 'DAILY_LIMIT_REACHED') {
+      return res.status(403).json({
+        success: false,
+        error: err.message,
+        slotsFull: true,
+      });
+    }
     let userMessage = err.message || 'Failed to save booking.';
     if (err.code === 403 || (err.message && err.message.toLowerCase().includes('permission'))) {
       userMessage = 'Server cannot write to your Google Sheet. Share the sheet with the service account email (see credentials.json "client_email") as Editor.';
@@ -442,6 +506,10 @@ app.get('/', (req, res) => {
 
 app.get('/book', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'book.html'));
+});
+
+app.get('/locate', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'locate.html'));
 });
 
 app.listen(PORT, () => {

@@ -16,16 +16,21 @@
   <header class="site-header print-header">
     <div class="container">
       <a href="/" class="logo-fallback print-logo">Standard Hair and Makeup Studio</a>
-      <a href="/book" class="nav-link print-nav">Book</a>
+      <nav class="header-nav">
+        <a href="/book" class="nav-link print-nav">Book</a>
+        <a href="/locate" class="nav-link print-nav">Locate us</a>
+      </nav>
     </div>
   </header>
 
   <main>
-    <section class="page-header">
+    <section class="page-header book-page-header">
       <div class="container narrow">
-        <h1>Book your appointment</h1>
-        <p class="sub" id="page-sub">Bookings open daily at 12:00 AM. You can only book for today – no advance bookings.</p>
-        <div id="booking-status" class="booking-status" aria-live="polite"></div>
+        <div class="page-header-inner">
+          <h1>Book your appointment</h1>
+          <p class="sub" id="page-sub">Bookings open daily at 12:00 AM IST. Today only – no advance bookings. Up to 20 slots per day.</p>
+          <div id="booking-status" class="booking-status" aria-live="polite"></div>
+        </div>
       </div>
     </section>
 
@@ -62,14 +67,15 @@
               </div>
               <div class="form-row">
                 <label for="email">Email address</label>
-                <input type="email" id="email" name="email" placeholder="Optional" />
+                <input type="email" id="email" name="email" placeholder="Add if you want confirmation by email" />
+                <p class="form-field-hint">We’ll email your queue number. Please check spam and add us to your trusted senders.</p>
               </div>
               <div class="form-row">
                 <label for="service">Primary service <span class="required">*</span></label>
                 <select id="service" name="service" required>
                   <option value="">Choose a service</option>
                   <option value="Hair Services (Cut, Color, Styling)">Hair Services (Cut, Color, Styling)</option>
-                  <option value="Beauty Services (Facial, Waxing, Threading)">Beauty Services (Facial, Waxing, Threading)</option>
+                  <option value="Beauty Services (Facial)">Beauty Services (Facial)</option>
                   <option value="Spa/Massage Services">Spa/Massage Services</option>
                   <option value="Nail Services">Nail Services</option>
                   <option value="Bridal/Party Makeup">Bridal/Party Makeup</option>
@@ -103,9 +109,11 @@
       </div>
     </section>
 
-    <section class="info">
+    <section class="info info-card-section">
       <div class="container narrow">
-        <p class="info-text">Your booking is saved to our system. We’ll confirm your slot. To change or cancel, please contact us by phone.</p>
+        <div class="info-card">
+          <p class="info-text">Your booking is saved to our system. We’ll confirm your slot. To change or cancel, please contact us by phone.</p>
+        </div>
       </div>
     </section>
   </main>
@@ -113,7 +121,12 @@
   <footer class="site-footer print-footer">
     <div class="container">
       <p class="print-footer-text">&copy; Standard Hair and Makeup Studio. Bookings open daily at 12:00 AM.</p>
-      <a href="/" class="print-footer-link">Home</a>
+      <div class="footer-links">
+        <a href="/" class="print-footer-link">Home</a>
+        <a href="/book" class="print-footer-link">Book</a>
+        <a href="/locate" class="print-footer-link">Locate us</a>
+      </div>
+      <p class="footer-credit">Designed and developed by <strong>Pepe Inc</strong></p>
     </div>
   </footer>
 

@@ -25,10 +25,19 @@
     try {
       const res = await fetch('/api/booking-status');
       const data = await res.json();
-      statusEl.textContent = data.open
-        ? 'Bookings are open. You can submit your appointment below.'
-        : 'Bookings open daily at 12:00 AM (midnight). You can fill the form, but submission will be accepted after midnight.';
-      statusEl.className = 'booking-status ' + (data.open ? 'open' : 'closed');
+      statusEl.textContent = data.message || (data.open ? 'Bookings are open.' : 'Bookings open daily at 12:00 AM (midnight) IST.');
+      statusEl.className = 'booking-status ' + (data.slotsFull ? 'full' : data.open ? 'open' : 'closed');
+
+      var formSection = document.getElementById('custom-form-section');
+      var form = document.getElementById('booking-form');
+      if (data.slotsFull && formSection) {
+        formSection.classList.add('slots-full');
+        if (form) form.style.pointerEvents = 'none';
+        if (form) form.style.opacity = '0.6';
+      } else {
+        if (formSection) formSection.classList.remove('slots-full');
+        if (form) { form.style.pointerEvents = ''; form.style.opacity = ''; }
+      }
     } catch (_) {
       statusEl.textContent = 'Unable to load booking status.';
       statusEl.className = 'booking-status closed';
