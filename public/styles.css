@@ -652,6 +652,18 @@ button:focus-visible {
   color: var(--studio-dark);
 }
 
+.next-slot-countdown {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--studio-dark);
+  letter-spacing: 0.02em;
+}
+
+.landing-print-style .next-slot-countdown {
+  color: var(--studio-dark);
+}
+
 .landing-print-style .booking-form-section {
   background: var(--studio-cream);
   padding: 2.5rem 0 4rem;

@@ -42,6 +42,7 @@ For a low-traffic salon booking site, **Render’s free tier** is usually enough
    - If you use the custom form + Sheets API instead:
      - **GOOGLE_SPREADSHEET_ID** = your sheet ID  
      - **GOOGLE_SERVICE_ACCOUNT_JSON** = paste the **entire** JSON key (one line) from your service account file
+   - Optional (email queue number to customer): **SEND_BOOKING_EMAIL** = `true`, **SENDGRID_API_KEY**, **SENDGRID_FROM_EMAIL** — see [docs/EMAIL-QUEUE-NUMBER.md](EMAIL-QUEUE-NUMBER.md). Use SendGrid on Render; SMTP ports are blocked on free tier.
 
 6. Click **Create Web Service**. Render will build and deploy. Your site will be at `https://YOUR-APP-NAME.onrender.com`.
 

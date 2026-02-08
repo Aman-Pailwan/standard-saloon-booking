@@ -191,7 +191,7 @@ async function appendBookingToSheet(booking) {
   }
 
   if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
-    const err = new Error('We\'re done for today. All ' + MAX_BOOKINGS_PER_DAY + ' slots are filled. Bookings open again at 12:00 AM tomorrow.');
+    const err = new Error('We\'re done for today. All slots are full. Bookings open again at 12:00 AM tomorrow.');
     err.code = 'DAILY_LIMIT_REACHED';
     throw err;
   }
@@ -367,17 +367,15 @@ app.get('/api/booking-status', async (req, res) => {
 
   let message;
   if (slotsFull) {
-    message = "We're done for today. All " + MAX_BOOKINGS_PER_DAY + " slots are filled. Bookings open again at 12:00 AM tomorrow.";
+    message = "We're done for today. All slots are full. Bookings open again at 12:00 AM tomorrow.";
   } else if (windowOpen) {
-    message = currentBookingsToday + '/' + MAX_BOOKINGS_PER_DAY + ' slots filled for today. You can submit your appointment below.';
+    message = 'Slots are still available for today. You can submit your appointment below.';
   } else {
     message = 'Bookings open daily at 12:00 AM (midnight) IST. You can fill the form, but submission will be accepted after midnight.';
   }
 
   res.json({
     open,
-    currentBookingsToday,
-    maxBookingsPerDay: MAX_BOOKINGS_PER_DAY,
     slotsFull,
     message,
     nextOpening: getNextOpeningTime().toISOString(),
@@ -438,7 +436,7 @@ app.post('/api/book', async (req, res) => {
   if (currentCount >= MAX_BOOKINGS_PER_DAY) {
     return res.status(403).json({
       success: false,
-      error: "We're done for today. All " + MAX_BOOKINGS_PER_DAY + " slots are filled. Bookings open again at 12:00 AM tomorrow.",
+      error: "We're done for today. All slots are full. Bookings open again at 12:00 AM tomorrow.",
       slotsFull: true,
     });
   }
