@@ -24,6 +24,39 @@
     }
   }
 
+  function showAcknowledgementModal(messageText) {
+    const modal = document.getElementById('ack-modal');
+    const messageDiv = document.getElementById('ack-modal-message');
+    if (!modal || !messageDiv) return;
+    messageDiv.textContent = messageText;
+    modal.hidden = false;
+    modal.classList.add('ack-modal-visible');
+    const doneBtn = document.getElementById('ack-done-btn');
+    if (doneBtn) doneBtn.focus();
+  }
+
+  function hideAcknowledgementModal() {
+    const modal = document.getElementById('ack-modal');
+    if (!modal) return;
+    modal.hidden = true;
+    modal.classList.remove('ack-modal-visible');
+  }
+
+  function goHome() {
+    hideAcknowledgementModal();
+    window.location.href = '/';
+  }
+  const ackDoneBtn = document.getElementById('ack-done-btn');
+  if (ackDoneBtn) ackDoneBtn.addEventListener('click', goHome);
+  const ackBackdrop = document.querySelector('#ack-modal .ack-modal-backdrop');
+  if (ackBackdrop) ackBackdrop.addEventListener('click', goHome);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('ack-modal');
+      if (modal && !modal.hidden && modal.classList.contains('ack-modal-visible')) goHome();
+    }
+  });
+
   function formatCountdown(ms) {
     if (ms <= 0) return null;
     var totalSec = Math.floor(ms / 1000);
@@ -136,10 +169,10 @@
         if (data.queueNumber != null) {
           msg += '\nYour number in the queue: #' + data.queueNumber + ' for today.';
         }
-        showMessage(msg, 'success');
         form.reset();
         setMinDate();
         fetchBookingStatus();
+        showAcknowledgementModal(msg);
       } else {
         showMessage(data.error || 'Booking failed. Please try again.', 'error');
       }

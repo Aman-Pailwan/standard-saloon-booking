@@ -109,6 +109,18 @@
       </div>
     </section>
 
+    <!-- Acknowledgement popup – shown after successful booking; Done sends user home -->
+    <div id="ack-modal" class="ack-modal" role="dialog" aria-modal="true" aria-labelledby="ack-modal-title" aria-describedby="ack-modal-message" hidden>
+      <div class="ack-modal-backdrop"></div>
+      <div class="ack-modal-card">
+        <h2 id="ack-modal-title" class="ack-modal-title">Booking confirmed</h2>
+        <div id="ack-modal-message" class="ack-modal-message"></div>
+        <div class="ack-modal-actions">
+          <button type="button" id="ack-done-btn" class="btn btn-primary btn-book">Done</button>
+        </div>
+      </div>
+    </div>
+
     <section class="info info-card-section">
       <div class="container narrow">
         <div class="info-card">

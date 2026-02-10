@@ -822,6 +822,65 @@ button:focus-visible {
   border: 1px solid rgba(180, 60, 60, 0.25);
 }
 
+/* Acknowledgement modal – popup after successful booking */
+.ack-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.ack-modal[hidden] {
+  display: flex !important;
+}
+.ack-modal.ack-modal-visible {
+  opacity: 1;
+  visibility: visible;
+}
+.ack-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 51, 40, 0.4);
+  cursor: pointer;
+}
+.ack-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(26, 51, 40, 0.2);
+  border: 1px solid rgba(90, 154, 136, 0.25);
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+}
+.ack-modal-title {
+  margin: 0 0 1rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--studio-dark, #1a3328);
+}
+.ack-modal-message {
+  white-space: pre-line;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #3d4d47;
+  text-align: left;
+}
+.ack-modal-actions {
+  margin-top: 0.5rem;
+}
+.ack-modal-actions .btn-book {
+  width: 100%;
+}
+
 .landing-print-style .info {
   border-top: 1px solid rgba(90, 154, 136, 0.15);
   padding: 2rem 0 2.5rem;
