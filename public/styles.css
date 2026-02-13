@@ -904,6 +904,58 @@ button:focus-visible {
   line-height: 1.55;
 }
 
+/* Week off (e.g. Saturday) – one clear message card, no duplicate status line */
+.landing-print-style .book-page-header.has-week-off .booking-status.week-off-header {
+  display: none;
+}
+.week-off-section {
+  padding: 2rem 0 2.5rem;
+  background: var(--studio-cream);
+}
+.week-off-card {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(90, 154, 136, 0.2);
+  box-shadow: 0 6px 28px rgba(26, 51, 40, 0.08);
+  overflow: hidden;
+}
+.week-off-card-accent {
+  height: 5px;
+  background: linear-gradient(90deg, var(--studio-dark) 0%, var(--studio-teal) 50%, var(--studio-teal-light) 100%);
+}
+.week-off-card-inner {
+  padding: 2rem 1.75rem;
+  text-align: center;
+}
+.week-off-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--studio-teal);
+}
+.week-off-title {
+  margin: 0 0 0.6rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--studio-dark, #1a3328);
+  letter-spacing: 0.02em;
+}
+.week-off-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #3d4d47;
+}
+.week-off-text strong {
+  color: var(--studio-dark);
+}
+
 /* Locate us page */
 .locate-section {
   padding: 0 0 4rem;

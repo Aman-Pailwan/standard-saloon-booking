@@ -110,19 +110,36 @@
     try {
       const res = await fetch('/api/booking-status');
       const data = await res.json();
-      statusEl.textContent = data.message || (data.open ? 'Bookings are open.' : 'Bookings open daily at 12:00 AM (midnight) IST.');
-      statusEl.className = 'booking-status ' + (data.slotsFull ? 'full' : data.open ? 'open' : 'closed');
-
+      var weekOffSection = document.getElementById('week-off-section');
       var formSection = document.getElementById('custom-form-section');
       var formEl = document.getElementById('booking-form');
-      if (data.slotsFull && formSection) {
-        formSection.classList.add('slots-full');
-        if (formEl) { formEl.style.pointerEvents = 'none'; formEl.style.opacity = '0.6'; }
-        if (data.nextOpening) startCountdown(data.nextOpening);
-      } else {
+
+      if (data.weekOff) {
+        statusEl.textContent = '';
+        statusEl.className = 'booking-status week-off-header';
+        var headerSection = document.querySelector('.book-page-header');
+        if (headerSection) headerSection.classList.add('has-week-off');
+        if (weekOffSection) weekOffSection.style.display = 'block';
+        if (formSection) formSection.style.display = 'none';
+        var googleFormSection = document.getElementById('google-form-section');
+        if (googleFormSection) googleFormSection.style.display = 'none';
         stopCountdown();
-        if (formSection) formSection.classList.remove('slots-full');
-        if (formEl) { formEl.style.pointerEvents = ''; formEl.style.opacity = ''; }
+      } else {
+        statusEl.textContent = data.message || (data.open ? 'Bookings are open.' : 'Bookings open daily at 12:00 AM (midnight) IST.');
+        statusEl.className = 'booking-status ' + (data.slotsFull ? 'full' : data.open ? 'open' : 'closed');
+        var headerSection = document.querySelector('.book-page-header');
+        if (headerSection) headerSection.classList.remove('has-week-off');
+        if (weekOffSection) weekOffSection.style.display = 'none';
+        if (formSection) formSection.style.display = '';
+        if (data.slotsFull && formSection) {
+          formSection.classList.add('slots-full');
+          if (formEl) { formEl.style.pointerEvents = 'none'; formEl.style.opacity = '0.6'; }
+          if (data.nextOpening) startCountdown(data.nextOpening);
+        } else {
+          stopCountdown();
+          if (formSection) formSection.classList.remove('slots-full');
+          if (formEl) { formEl.style.pointerEvents = ''; formEl.style.opacity = ''; }
+        }
       }
     } catch (_) {
       stopCountdown();

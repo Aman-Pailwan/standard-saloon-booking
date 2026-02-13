@@ -108,6 +108,36 @@ For a low-traffic salon booking site, **Render’s free tier** is usually enough
 | **GOOGLE_SERVICE_ACCOUNT_JSON** | Only if using custom form + Sheets API. Paste full JSON key. |
 | **PORT** | Usually set by the host; don’t set unless needed. |
 | **BOOKING_ALWAYS_OPEN** | Optional. Set to `true` to accept bookings at any time (testing). |
+| **SATURDAY_OFF** | Optional. Set to `true` to take Saturdays off: form is hidden and a “Weekly break” message is shown; bookings open again from Sunday 12:00 AM IST. |
+
+---
+
+## Deploying when you already have customers (e.g. on free Render)
+
+Your **customer data lives in Google Sheets** (and optionally in emails you’ve sent). The app is stateless, so deploying new code does **not** delete or change existing bookings.
+
+### How to deploy new code
+
+1. **Push to GitHub** (if you use auto-deploy):
+   ```bash
+   git add .
+   git commit -m "Your change description"
+   git push origin main
+   ```
+   Render will build and deploy from the latest commit.
+
+2. **Or use Manual Deploy:** Render Dashboard → your Web Service → **Manual Deploy** → **Deploy latest commit**.
+
+### What to expect on free Render
+
+- **During deploy:** The service restarts. There may be **30–60 seconds** where the site is unavailable or returns errors. After that, the new version is live.
+- **No data loss:** Bookings are in your Sheet and (if enabled) in sent emails. Redeploying only updates the running code.
+- **Env vars:** If you add or change environment variables in the Render dashboard, save them and trigger a new deploy (or they apply on the next deploy).
+
+### If you need less disruption
+
+- **Paid Render (Starter ~$7/mo):** No sleep, no cold starts, and **zero-downtime deploys** (new instance starts before the old one is removed). Good once you have real traffic.
+- **Off-peak deploys:** Deploy when you have the fewest bookings (e.g. late night) to minimize the chance someone hits the brief downtime.
 
 ---
 
