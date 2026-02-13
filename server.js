@@ -36,27 +36,34 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Standard Hair and Makeup Studio';
 const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || process.env.SENDGRID_FROM_EMAIL || SMTP_USER;
 
-const TIMEZONE_IST = 'Asia/Kolkata';
+/** IST = UTC + 5 hours 30 minutes. All booking logic uses IST only; server timezone is ignored. */
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
-/** Current date in IST as YYYY-MM-DD (for sheet tab and booking date when server is in another region) */
+/** Current moment in IST (as a Date whose UTC getters give IST date/time) */
+function getISTNow() {
+  return new Date(Date.now() + IST_OFFSET_MS);
+}
+
+/** Current date in IST as YYYY-MM-DD (same on any server) */
 function getISTDateString() {
-  const parts = new Date().toLocaleString('en-IN', { timeZone: TIMEZONE_IST, year: 'numeric', month: '2-digit', day: '2-digit' }).split('/');
-  const [d, m, y] = parts;
-  return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  const ist = getISTNow();
+  const y = ist.getUTCFullYear();
+  const m = String(ist.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(ist.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
-/** Current hour (0–23) and minute in IST */
+/** Current hour (0–23) and minute in IST (same on any server) */
 function getISTTime() {
-  const str = new Date().toLocaleString('en-IN', { timeZone: TIMEZONE_IST, hour: '2-digit', minute: '2-digit', hour12: false });
-  const [hour, minute] = str.split(':').map((n) => parseInt(n, 10));
-  return { hour: hour || 0, minute: minute || 0 };
+  const ist = getISTNow();
+  return { hour: ist.getUTCHours(), minute: ist.getUTCMinutes() };
 }
 
-/** True if current date in IST is Saturday (used when SATURDAY_OFF is set) */
+/** True if current date in IST is Saturday; uses calendar date so correct on any server */
 function isSaturdayIST() {
   const istDateStr = getISTDateString();
-  const d = new Date(istDateStr + 'T00:00:00+05:30');
-  return d.getDay() === 6;
+  const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
+  return new Date(y, m - 1, d).getDay() === 6;
 }
 
 function getSheetNameForDate(date) {
@@ -91,15 +98,19 @@ async function getTodayBookingCount() {
   }
 }
 
-/** Format a date as IST for display in the sheet (e.g. "31/1/2025, 3:45:00 pm IST") */
+/** Format a date as IST for display in the sheet (e.g. "31/1/2025, 3:45:00 pm IST"); uses IST offset only */
 function toISTString(date) {
-  const d = date ? new Date(date) : new Date();
-  return d.toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    dateStyle: 'short',
-    timeStyle: 'medium',
-    hour12: true,
-  }) + ' IST';
+  const ist = new Date((date ? new Date(date).getTime() : Date.now()) + IST_OFFSET_MS);
+  const d = ist.getUTCDate();
+  const m = ist.getUTCMonth() + 1;
+  const y = ist.getUTCFullYear();
+  const h = ist.getUTCHours();
+  const min = ist.getUTCMinutes();
+  const s = ist.getUTCSeconds();
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const h12 = h % 12 || 12;
+  const time = `${h12}:${String(min).padStart(2, '0')}:${String(s).padStart(2, '0')} ${ampm}`;
+  return `${d}/${m}/${y}, ${time} IST`;
 }
 
 /** Get Google Sheets client using service account */
@@ -400,6 +411,19 @@ app.get('/api/booking-status', async (req, res) => {
     weekOff: weekOff || undefined,
     message,
     nextOpening: getNextOpeningTime().toISOString(),
+  });
+});
+
+/** Debug: what does the server think? (IST date, Saturday?, SATURDAY_OFF, weekOff) – use on Render to verify */
+app.get('/api/status-debug', (req, res) => {
+  const istDate = getISTDateString();
+  const saturday = isSaturdayIST();
+  res.json({
+    istDate,
+    isSaturday: saturday,
+    SATURDAY_OFF,
+    weekOff: SATURDAY_OFF && saturday,
+    serverTime: new Date().toISOString(),
   });
 });
 

@@ -155,3 +155,26 @@ Your **customer data lives in Google Sheets** (and optionally in emails you’ve
 - [ ] `npm start` works locally.
 - [ ] Project is pushed to GitHub (for Render/Railway).
 - [ ] GOOGLE_FORM_EMBED_URL (or Sheets env vars) set on the host.
+
+---
+
+## Troubleshooting on Render
+
+**“Week off” / Saturday not showing, or changes not visible**
+
+1. **Redeploy**  
+   Render only runs the code it last built. Push your latest commit and trigger a deploy (or use **Manual Deploy → Deploy latest commit**).
+
+2. **Set env vars and redeploy**  
+   For Saturday week-off, add **SATURDAY_OFF** = `true` in the Render dashboard (Environment). Save and redeploy; env vars apply only after a new deploy.
+
+3. **Check what the server sees**  
+   Open:  
+   `https://YOUR-APP-NAME.onrender.com/api/status-debug`  
+   You should see `istDate`, `isSaturday`, `SATURDAY_OFF`, and `weekOff`. If `SATURDAY_OFF` is `false`, the env var isn’t set. If it’s Saturday in India but `isSaturday` is `false`, the server’s idea of the date is wrong (the code includes a fallback for IST; redeploy to get it).
+
+4. **Hard refresh the book page**  
+   Use Ctrl+Shift+R (or Cmd+Shift+R) so the browser doesn’t use cached JS/CSS.
+
+**Acknowledgement popup (Done → home)**  
+   That runs in the **custom form** only. If you use the embedded **Google Form** (`GOOGLE_FORM_EMBED_URL`), submissions go to Google and the popup doesn’t run. Use the custom form + Sheets API if you want the popup.
