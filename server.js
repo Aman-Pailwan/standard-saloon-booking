@@ -450,6 +450,7 @@ app.get('/api/status-debug', (req, res) => {
   res.json({
     istDate,
     isSaturday: saturday,
+    maxBookingsPerDay: MAX_BOOKINGS_PER_DAY,
     SATURDAY_OFF,
     weekOff: isWeekOff(),
     bookingDate: getBookingDateString(),
