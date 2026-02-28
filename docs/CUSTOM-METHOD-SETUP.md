@@ -155,7 +155,7 @@ The email says: *"You are #N in the queue for today."* If the customer didn’t 
 |----------|--------|
 | **USE_DAILY_SHEETS=false** | Use one fixed tab (e.g. "Bookings") instead of one tab per day. |
 | **GOOGLE_SHEET_NAME=Bookings** | Name of that fixed tab (only when `USE_DAILY_SHEETS=false`). |
-| **BOOKING_ALWAYS_OPEN=true** | Accept bookings at any time (ignore 12:00 AM rule; good for testing). |
+| **BOOKING_ALWAYS_OPEN=true** | Accept bookings at any time (ignore 9:00 PM IST rule; good for testing). |
 | **SEND_BOOKING_EMAIL=true** | Send customer an email with queue number (requires SMTP_* env vars and customer email). |
 
 Once this is set up, the **custom method** is in use: our form, your Sheet, queue number on screen (and optionally by email) after each booking.

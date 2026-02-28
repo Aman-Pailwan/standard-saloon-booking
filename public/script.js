@@ -125,7 +125,7 @@
         if (googleFormSection) googleFormSection.style.display = 'none';
         stopCountdown();
       } else {
-        statusEl.textContent = data.message || (data.open ? 'Bookings are open.' : 'Bookings open daily at 12:00 AM (midnight) IST.');
+        statusEl.textContent = data.message || (data.open ? 'Bookings are open.' : 'Bookings open daily at 9:00 PM IST.');
         statusEl.className = 'booking-status ' + (data.slotsFull ? 'full' : data.open ? 'open' : 'closed');
         var headerSection = document.querySelector('.book-page-header');
         if (headerSection) headerSection.classList.remove('has-week-off');
