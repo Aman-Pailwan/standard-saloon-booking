@@ -108,7 +108,8 @@ For a low-traffic salon booking site, **Render’s free tier** is usually enough
 | **GOOGLE_SERVICE_ACCOUNT_JSON** | Only if using custom form + Sheets API. Paste full JSON key. |
 | **PORT** | Usually set by the host; don’t set unless needed. |
 | **BOOKING_ALWAYS_OPEN** | Optional. Set to `true` to accept bookings at any time (testing). |
-| **SATURDAY_OFF** | Optional. Set to `true` to take Saturdays off: form is hidden and a “Weekly break” message is shown; bookings open again from Sunday 12:00 AM IST. |
+| **SATURDAY_OFF** | Optional. Set to `true` to take Saturdays off: form is hidden and a “Weekly break” message is shown; form hidden until 9 PM Saturday, then open for Sunday. |
+| **TEST_SATURDAY_9PM** | Optional. Set to `true` to simulate Saturday 9:00 PM IST (form opens for Sunday). Use with SATURDAY_OFF=true to test. |
 
 ---
 
@@ -171,7 +172,7 @@ Your **customer data lives in Google Sheets** (and optionally in emails you’ve
 3. **Check what the server sees**  
    Open:  
    `https://YOUR-APP-NAME.onrender.com/api/status-debug`  
-   You should see `istDate`, `isSaturday`, `SATURDAY_OFF`, and `weekOff`. If `SATURDAY_OFF` is `false`, the env var isn’t set. If it’s Saturday in India but `isSaturday` is `false`, the server’s idea of the date is wrong (the code includes a fallback for IST; redeploy to get it).
+   You should see `istDate`, `isSaturday`, `SATURDAY_OFF`, `weekOff`, `bookingDate`, and `open`. To test “Saturday 9 PM → open for Sunday”, set **TEST_SATURDAY_9PM** = `true` and **SATURDAY_OFF** = `true`, then redeploy and open `/api/status-debug` and `/book`: you should see `weekOff: false`, `bookingDate` = Sunday’s date, `open: true`, and the booking form visible.
 
 4. **Hard refresh the book page**  
    Use Ctrl+Shift+R (or Cmd+Shift+R) so the browser doesn’t use cached JS/CSS.

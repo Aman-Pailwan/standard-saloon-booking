@@ -7,7 +7,7 @@ A salon booking site with a **Walmart-inspired** UI. You can use it **the same w
 - **Landing page** – Hero, features, and “Book now” button
 - **Booking page** (`/book`) – Either **embedded Google Form** (Form → Sheet) or custom form
 - **Google Form + Sheets** – Create a Form, link to a Sheet; responses go to the Sheet like normal
-- **12:00 AM rule** – (Custom form only) Submissions accepted from 12:00 AM (midnight) daily; with Google Form you control when the form is open
+- **9:00 PM IST rule** – (Custom form only) Submissions accepted from 9:00 PM IST daily; with Google Form you control when the form is open
 - **Daily sheet tabs** – (Custom form + API) One new tab per day in the same spreadsheet (tab name = `YYYY-MM-DD`)
 - **Email queue number** – (Custom form) Optionally email the customer their queue number; see [docs/EMAIL-QUEUE-NUMBER.md](docs/EMAIL-QUEUE-NUMBER.md)
 - **Testing** – Set `BOOKING_ALWAYS_OPEN=true` to keep bookings open at any time
@@ -115,7 +115,7 @@ No API keys or service account. Responses go to your Sheet via Google’s built-
    export GOOGLE_SHEET_NAME="Bookings"
    ```
 
-   **Testing – keep booking open:** Accept bookings at any time (ignore 12:00 AM rule):
+   **Testing – keep booking open:** Accept bookings at any time (ignore 9:00 PM IST rule):
 
    ```bash
    export BOOKING_ALWAYS_OPEN="true"
