@@ -61,6 +61,14 @@ function getISTDateString() {
   return `${y}-${m}-${d}`;
 }
 
+/** Yesterday's date in IST (for "booking date" when we're before 9 PM – we're still in yesterday's window) */
+function getYesterdayISTDateString() {
+  const istDateStr = getISTDateString();
+  const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
+  const yesterday = new Date(y, m - 1, d - 1);
+  return yesterday.getFullYear() + '-' + String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + String(yesterday.getDate()).padStart(2, '0');
+}
+
 /** Current hour (0–23) and minute in IST (same on any server) */
 function getISTTime() {
   const ist = getISTNow();
@@ -74,7 +82,7 @@ function isSaturdayIST() {
   return new Date(y, m - 1, d).getDay() === 6;
 }
 
-/** Date we are currently accepting bookings for (IST). From 9 PM Saturday we book for Sunday; otherwise today. */
+/** Date we are currently accepting bookings for (IST). From 9 PM Saturday we book for Sunday; otherwise from 9 PM we book for today until next 9 PM. */
 function getBookingDateString() {
   const istDateStr = getISTDateString();
   const { hour, minute } = getISTTime();
@@ -84,7 +92,11 @@ function getBookingDateString() {
     const tomorrow = new Date(y, m - 1, d + 1);
     return tomorrow.getFullYear() + '-' + String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' + String(tomorrow.getDate()).padStart(2, '0');
   }
-  return istDateStr;
+  // From 9 PM to next 9 PM we accept for the same day. Before 9 PM we're still in "yesterday's" window.
+  if (hour >= BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST)) {
+    return istDateStr;
+  }
+  return getYesterdayISTDateString();
 }
 
 /** True when Saturday is week off AND we're before 9 PM (so from 9 PM Saturday we open for Sunday) */
@@ -102,7 +114,7 @@ function getSheetNameForDate(date) {
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
-  return getISTDateString();
+  return getBookingDateString();
 }
 
 /** Get booking count for the date we're currently accepting (uses getBookingDateString so Sat 9 PM = Sunday's sheet). */
@@ -385,8 +397,10 @@ app.use(express.json());
 function isBookingWindowOpen() {
   if (BOOKING_ALWAYS_OPEN) return true;
   if (isWeekOff()) return false;
+  // Open from 9 PM until next 9 PM (24h window). So we're open any time except Saturday before 9 PM when SATURDAY_OFF.
   const { hour, minute } = getISTTime();
-  return hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
+  const past9PmToday = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
+  return past9PmToday || hour < BOOKING_OPEN_HOUR_IST;
 }
 
 function getNextOpeningTime() {
