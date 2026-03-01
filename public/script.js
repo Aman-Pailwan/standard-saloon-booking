@@ -72,7 +72,12 @@
 
   function startCountdown(nextOpeningISO) {
     if (countdownInterval) clearInterval(countdownInterval);
-    if (!countdownEl || !nextOpeningISO) return;
+    if (!countdownEl) return;
+    countdownEl.style.display = 'block';
+    if (!nextOpeningISO) {
+      countdownEl.textContent = 'Next slot opens at 9:00 PM IST tomorrow.';
+      return;
+    }
     var nextOpen = new Date(nextOpeningISO);
     function tick() {
       var now = new Date();
@@ -80,15 +85,13 @@
       if (ms <= 0) {
         clearInterval(countdownInterval);
         countdownInterval = null;
-        countdownEl.style.display = 'none';
-        countdownEl.textContent = '';
+        countdownEl.textContent = 'Next slot opens at 9:00 PM IST tomorrow.';
         fetchBookingStatus();
         return;
       }
       var str = formatCountdown(ms);
       if (str) {
         countdownEl.textContent = 'Next slot opens in: ' + str;
-        countdownEl.style.display = 'block';
       }
     }
     tick();
@@ -131,10 +134,12 @@
         if (headerSection) headerSection.classList.remove('has-week-off');
         if (weekOffSection) weekOffSection.style.display = 'none';
         if (formSection) formSection.style.display = '';
-        if (data.slotsFull && formSection) {
-          formSection.classList.add('slots-full');
-          if (formEl) { formEl.style.pointerEvents = 'none'; formEl.style.opacity = '0.6'; }
-          if (data.nextOpening) startCountdown(data.nextOpening);
+        if (data.slotsFull) {
+          if (formSection) {
+            formSection.classList.add('slots-full');
+            if (formEl) { formEl.style.pointerEvents = 'none'; formEl.style.opacity = '0.6'; }
+          }
+          startCountdown(data.nextOpening || null);
         } else {
           stopCountdown();
           if (formSection) formSection.classList.remove('slots-full');
