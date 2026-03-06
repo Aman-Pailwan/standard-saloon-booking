@@ -82,6 +82,13 @@ function isSaturdayIST() {
   return new Date(y, m - 1, d).getDay() === 6;
 }
 
+/** True if current date in IST is Friday */
+function isFridayIST() {
+  const istDateStr = getISTDateString();
+  const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
+  return new Date(y, m - 1, d).getDay() === 5;
+}
+
 /** Date we are currently accepting bookings for (IST). From 9 PM Saturday we book for Sunday; otherwise from 9 PM we book for today until next 9 PM. */
 function getBookingDateString() {
   const istDateStr = getISTDateString();
@@ -99,11 +106,15 @@ function getBookingDateString() {
   return getYesterdayISTDateString();
 }
 
-/** True when Saturday is week off AND we're before 9 PM (so from 9 PM Saturday we open for Sunday) */
+/** True when SATURDAY_OFF and we're in the week-off window: Friday 9 PM → Saturday 9 PM. From Saturday 9 PM we open for Sunday. */
 function isWeekOff() {
-  if (!SATURDAY_OFF || !isSaturdayIST()) return false;
+  if (!SATURDAY_OFF) return false;
   const { hour, minute } = getISTTime();
-  return hour < BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute < BOOKING_OPEN_MINUTE_IST);
+  const past9Pm = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
+  const before9Pm = hour < BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute < BOOKING_OPEN_MINUTE_IST);
+  if (isFridayIST() && past9Pm) return true;   // Friday after 9 PM → off
+  if (isSaturdayIST() && before9Pm) return true; // Saturday before 9 PM → off
+  return false;
 }
 
 function getSheetNameForDate(date) {
@@ -411,7 +422,7 @@ function getNextOpeningTime() {
   const { hour, minute } = getISTTime();
   const alreadyOpen = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
   if (isWeekOff()) {
-    nextDate = todayDate;
+    nextDate = isSaturdayIST() ? todayDate : new Date(y, m - 1, d + 1);
   } else if (alreadyOpen) {
     nextDate = new Date(y, m - 1, d + 1);
   } else {
@@ -439,7 +450,9 @@ app.get('/api/booking-status', async (req, res) => {
 
   let message;
   if (weekOff) {
-    message = "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday).";
+    message = isSaturdayIST()
+      ? "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday)."
+      : "We're on our weekly break. Bookings open again at 9:00 PM IST tomorrow, Saturday (for Sunday).";
   } else if (slotsFull) {
     message = "We're done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.";
   } else if (windowOpen) {
@@ -519,7 +532,9 @@ app.post('/api/book', async (req, res) => {
   if (isWeekOff()) {
     return res.status(403).json({
       success: false,
-      error: "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday).",
+      error: isSaturdayIST()
+        ? "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday)."
+        : "We're on our weekly break. Bookings open again at 9:00 PM IST tomorrow, Saturday (for Sunday).",
       weekOff: true,
     });
   }
