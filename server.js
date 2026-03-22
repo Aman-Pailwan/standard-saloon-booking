@@ -1,7 +1,15 @@
 const express = require('express');
 const path = require('path');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const IST_TZ = 'Asia/Kolkata';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,8 +32,11 @@ const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 // Max bookings per day; once reached, no more accepted until next day (9:00 PM IST)
 const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '20', 10) || 20;
 
-// Weekly day off: when true, no bookings accepted on Saturday (IST); form hidden and "week off" shown
+// Weekly break (IST): when true, no bookings from Friday 9:00 PM through Saturday 8:59 PM; opens Saturday 9:00 PM (still uses env name SATURDAY_OFF for compatibility)
 const SATURDAY_OFF = process.env.SATURDAY_OFF === 'true' || process.env.SATURDAY_OFF === '1';
+
+const WEEKLY_BREAK_USER_MESSAGE =
+  "We're on our weekly break (Friday 9 PM – Saturday 9 PM IST). Online bookings open again Saturday at 9:00 PM IST.";
 
 // Optional: send email to customer with queue number
 // On Render free tier: use SENDGRID_API_KEY (SMTP ports 587/465 are blocked). Locally: SMTP (Gmail) works.
@@ -38,91 +49,89 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Standard Hair and Makeup Studio';
 const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || process.env.SENDGRID_FROM_EMAIL || SMTP_USER;
 
-/** IST = UTC + 5 hours 30 minutes. All booking logic uses IST only; server timezone is ignored. */
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-
 /** Set TEST_SATURDAY_9PM=true to simulate Saturday 9:00 PM IST (form opens for Sunday). Use with SATURDAY_OFF=true. */
 const TEST_SATURDAY_9PM = process.env.TEST_SATURDAY_9PM === 'true' || process.env.TEST_SATURDAY_9PM === '1';
 
-/** Current moment in IST (as a Date whose UTC getters give IST date/time). Overridden when TEST_SATURDAY_9PM. */
-function getISTNow() {
+/** Current moment in Asia/Kolkata. Server host timezone is ignored. Overridden when TEST_SATURDAY_9PM. */
+function istMoment() {
   if (TEST_SATURDAY_9PM) {
-    return new Date(Date.UTC(2025, 1, 15, 21, 0, 0, 0));
+    return dayjs.tz('2025-02-15 21:00:00', 'YYYY-MM-DD HH:mm:ss', IST_TZ);
   }
-  return new Date(Date.now() + IST_OFFSET_MS);
+  return dayjs().tz(IST_TZ);
 }
 
-/** Current date in IST as YYYY-MM-DD (same on any server) */
+/** Current date in IST as YYYY-MM-DD */
 function getISTDateString() {
-  const ist = getISTNow();
-  const y = ist.getUTCFullYear();
-  const m = String(ist.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(ist.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return istMoment().format('YYYY-MM-DD');
 }
 
-/** Yesterday's date in IST (for "booking date" when we're before 9 PM – we're still in yesterday's window) */
-function getYesterdayISTDateString() {
-  const istDateStr = getISTDateString();
-  const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
-  const yesterday = new Date(y, m - 1, d - 1);
-  return yesterday.getFullYear() + '-' + String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + String(yesterday.getDate()).padStart(2, '0');
-}
-
-/** Current hour (0–23) and minute in IST (same on any server) */
+/** Current hour (0–23) and minute in IST */
 function getISTTime() {
-  const ist = getISTNow();
-  return { hour: ist.getUTCHours(), minute: ist.getUTCMinutes() };
+  const m = istMoment();
+  return { hour: m.hour(), minute: m.minute() };
 }
 
-/** True if current date in IST is Saturday; uses calendar date so correct on any server */
-function isSaturdayIST() {
-  const istDateStr = getISTDateString();
-  const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
-  return new Date(y, m - 1, d).getDay() === 6;
-}
-
-/** Date we are currently accepting bookings for (IST). From 9 PM Saturday we book for Sunday; otherwise from 9 PM we book for today until next 9 PM. */
+/** Date we are currently accepting bookings for (IST). With SATURDAY_OFF, from Saturday 9 PM we book for Sunday; otherwise from 9 PM we book for “today’s” tab until the next 9 PM. */
 function getBookingDateString() {
-  const istDateStr = getISTDateString();
-  const { hour, minute } = getISTTime();
-  const saturday9PmOrLater = isSaturdayIST() && (hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST));
-  if (SATURDAY_OFF && saturday9PmOrLater) {
-    const [y, m, d] = istDateStr.split('-').map((n) => parseInt(n, 10));
-    const tomorrow = new Date(y, m - 1, d + 1);
-    return tomorrow.getFullYear() + '-' + String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' + String(tomorrow.getDate()).padStart(2, '0');
+  const now = istMoment();
+  const istDateStr = now.format('YYYY-MM-DD');
+  const hour = now.hour();
+  const minute = now.minute();
+  // dayjs: 0=Sun … 6=Sat — after weekly break ends Sat 9 PM, first cycle uses Sunday’s sheet
+  const saturdayAtOrAfterOpen =
+    now.day() === 6 &&
+    (hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST));
+  if (SATURDAY_OFF && saturdayAtOrAfterOpen) {
+    return now.add(1, 'day').format('YYYY-MM-DD');
   }
-  // From 9 PM to next 9 PM we accept for the same day. Before 9 PM we're still in "yesterday's" window.
-  if (hour >= BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST)) {
+  if (hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST)) {
     return istDateStr;
   }
-  return getYesterdayISTDateString();
+  return now.subtract(1, 'day').format('YYYY-MM-DD');
 }
 
-/** True when Saturday is week off AND we're before 9 PM (so from 9 PM Saturday we open for Sunday) */
+/**
+ * True during weekly break: Friday 9:00 PM IST (inclusive) through Saturday 8:59 PM IST.
+ * Bookings resume Saturday 9:00 PM IST (for Sunday’s sheet when SATURDAY_OFF is on).
+ */
 function isWeekOff() {
-  if (!SATURDAY_OFF || !isSaturdayIST()) return false;
-  const { hour, minute } = getISTTime();
-  return hour < BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute < BOOKING_OPEN_MINUTE_IST);
+  if (!SATURDAY_OFF) return false;
+  const now = istMoment();
+  const d = now.day();
+  const hour = now.hour();
+  const minute = now.minute();
+  const atOrAfterOpen =
+    hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
+  const beforeOpen = hour < BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute < BOOKING_OPEN_MINUTE_IST);
+  if (d === 5 && atOrAfterOpen) return true; // Friday from 9 PM
+  if (d === 6 && beforeOpen) return true; // Saturday until 9 PM
+  return false;
 }
 
 function getSheetNameForDate(date) {
   if (date) {
-    const d = new Date(date);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+    const parsed = dayjs.tz(String(date).trim(), 'YYYY-MM-DD', IST_TZ);
+    return parsed.isValid() ? parsed.format('YYYY-MM-DD') : getBookingDateString();
   }
   return getBookingDateString();
 }
 
-/** Get booking count for the date we're currently accepting (uses getBookingDateString so Sat 9 PM = Sunday's sheet). */
-async function getTodayBookingCount() {
+/**
+ * Tab name for a booking cycle. When bookingDateYmd is set (YYYY-MM-DD), use it so count + append stay on the same tab
+ * even if the request spans the 9 PM IST window boundary while awaiting Google APIs.
+ */
+function getTabNameForBookingCycle(bookingDateYmd) {
+  if (!USE_DAILY_SHEETS) return SHEET_NAME;
+  if (bookingDateYmd) return getSheetNameForDate(bookingDateYmd);
+  return getBookingDateString();
+}
+
+/** Get booking count for the active cycle, or for a fixed YYYY-MM-DD when provided (POST /api/book). */
+async function getTodayBookingCount(bookingDateYmd) {
   if (!SPREADSHEET_ID) return 0;
   try {
     const sheets = getSheetsClient();
-    const tabName = USE_DAILY_SHEETS ? getBookingDateString() : SHEET_NAME;
+    const tabName = getTabNameForBookingCycle(bookingDateYmd);
     const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
     const existingTitles = (meta.data.sheets || []).map(s => s.properties.title);
     if (!existingTitles.includes(tabName)) return 0;
@@ -138,19 +147,10 @@ async function getTodayBookingCount() {
   }
 }
 
-/** Format a date as IST for display in the sheet (e.g. "31/1/2025, 3:45:00 pm IST"); uses IST offset only */
+/** Format instant as IST for the sheet (e.g. "31/1/2025, 3:45:00 pm IST") */
 function toISTString(date) {
-  const ist = new Date((date ? new Date(date).getTime() : Date.now()) + IST_OFFSET_MS);
-  const d = ist.getUTCDate();
-  const m = ist.getUTCMonth() + 1;
-  const y = ist.getUTCFullYear();
-  const h = ist.getUTCHours();
-  const min = ist.getUTCMinutes();
-  const s = ist.getUTCSeconds();
-  const ampm = h >= 12 ? 'pm' : 'am';
-  const h12 = h % 12 || 12;
-  const time = `${h12}:${String(min).padStart(2, '0')}:${String(s).padStart(2, '0')} ${ampm}`;
-  return `${d}/${m}/${y}, ${time} IST`;
+  const d = date != null ? dayjs(date) : dayjs();
+  return d.tz(IST_TZ).format('D/M/YYYY, h:mm:ss a') + ' IST';
 }
 
 /** Get Google Sheets client using service account */
@@ -183,7 +183,8 @@ function getSheetsClient() {
 async function appendBookingToSheet(booking) {
   if (!SPREADSHEET_ID) throw new Error('GOOGLE_SPREADSHEET_ID is not set');
   const sheets = getSheetsClient();
-  const tabName = USE_DAILY_SHEETS ? getSheetNameForDate() : SHEET_NAME;
+  // Must match booking.date — never recompute from the clock here (Sheets calls can cross 9 PM IST / midnight).
+  const tabName = USE_DAILY_SHEETS ? getSheetNameForDate(booking.date) : SHEET_NAME;
 
   const bookedAt = toISTString(new Date());
   const row = [
@@ -198,10 +199,31 @@ async function appendBookingToSheet(booking) {
     bookedAt,
   ];
 
-  // List existing sheets and create daily tab if missing
   const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
   const existingTitles = (meta.data.sheets || []).map(s => s.properties.title);
-  if (!existingTitles.includes(tabName)) {
+  const tabExists = existingTitles.includes(tabName);
+
+  let dataRowCount = 0;
+  if (tabExists) {
+    try {
+      const countRes = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${tabName}!A:A`,
+      });
+      const rows = countRes.data.values || [];
+      dataRowCount = rows.length <= 1 ? 0 : rows.length - 1;
+    } catch (_) {
+      dataRowCount = 0;
+    }
+  }
+
+  if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
+    const err = new Error('We\'re done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.');
+    err.code = 'DAILY_LIMIT_REACHED';
+    throw err;
+  }
+
+  if (!tabExists) {
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
       requestBody: {
@@ -236,25 +258,23 @@ async function appendBookingToSheet(booking) {
     } else throw e;
   }
 
-  // Get current row count for queue number (data rows only, excluding header)
-  let queueNumber = 1;
-  let dataRowCount = 0;
+  let queueNumber = dataRowCount + 1;
   try {
     const countRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${tabName}!A:A`,
     });
     const rows = countRes.data.values || [];
-    dataRowCount = rows.length <= 1 ? 0 : rows.length - 1; // subtract header
+    const freshCount = rows.length <= 1 ? 0 : rows.length - 1;
+    queueNumber = freshCount + 1;
+    if (freshCount >= MAX_BOOKINGS_PER_DAY) {
+      const err = new Error('We\'re done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.');
+      err.code = 'DAILY_LIMIT_REACHED';
+      throw err;
+    }
+  } catch (e) {
+    if (e.code === 'DAILY_LIMIT_REACHED') throw e;
     queueNumber = dataRowCount + 1;
-  } catch (_) {
-    queueNumber = 1;
-  }
-
-  if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
-    const err = new Error('We\'re done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.');
-    err.code = 'DAILY_LIMIT_REACHED';
-    throw err;
   }
 
   await sheets.spreadsheets.values.append({
@@ -397,28 +417,33 @@ app.use(express.json());
 function isBookingWindowOpen() {
   if (BOOKING_ALWAYS_OPEN) return true;
   if (isWeekOff()) return false;
-  // Open from 9 PM until next 9 PM (24h window). So we're open any time except Saturday before 9 PM when SATURDAY_OFF.
+  // Open from 9 PM until next 9 PM (24h window), except during Fri 9 PM – Sat 9 PM when SATURDAY_OFF.
   const { hour, minute } = getISTTime();
   const past9PmToday = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
   return past9PmToday || hour < BOOKING_OPEN_HOUR_IST;
 }
 
 function getNextOpeningTime() {
-  const istToday = getISTDateString();
-  const [y, m, d] = istToday.split('-').map((n) => parseInt(n, 10));
-  const todayDate = new Date(y, m - 1, d);
-  let nextDate = todayDate;
-  const { hour, minute } = getISTTime();
+  const now = istMoment();
+  const hour = now.hour();
+  const minute = now.minute();
   const alreadyOpen = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
-  if (isWeekOff()) {
-    nextDate = todayDate;
-  } else if (alreadyOpen) {
-    nextDate = new Date(y, m - 1, d + 1);
-  } else {
-    nextDate = todayDate;
+
+  if (SATURDAY_OFF && isWeekOff()) {
+    const ymd =
+      now.day() === 5
+        ? now.add(1, 'day').format('YYYY-MM-DD')
+        : now.format('YYYY-MM-DD');
+    const hh = String(BOOKING_OPEN_HOUR_IST).padStart(2, '0');
+    const mm = String(BOOKING_OPEN_MINUTE_IST).padStart(2, '0');
+    return dayjs.tz(`${ymd} ${hh}:${mm}:00`, 'YYYY-MM-DD HH:mm:ss', IST_TZ).toDate();
   }
-  const nextStr = nextDate.getFullYear() + '-' + String(nextDate.getMonth() + 1).padStart(2, '0') + '-' + String(nextDate.getDate()).padStart(2, '0');
-  return new Date(nextStr + 'T' + String(BOOKING_OPEN_HOUR_IST).padStart(2, '0') + ':' + String(BOOKING_OPEN_MINUTE_IST).padStart(2, '0') + ':00+05:30');
+
+  const calendarDay = !alreadyOpen ? now : now.add(1, 'day');
+  const ymd = calendarDay.format('YYYY-MM-DD');
+  const hh = String(BOOKING_OPEN_HOUR_IST).padStart(2, '0');
+  const mm = String(BOOKING_OPEN_MINUTE_IST).padStart(2, '0');
+  return dayjs.tz(`${ymd} ${hh}:${mm}:00`, 'YYYY-MM-DD HH:mm:ss', IST_TZ).toDate();
 }
 
 // Tell frontend whether to show embedded Google Form or our custom form
@@ -436,10 +461,9 @@ app.get('/api/booking-status', async (req, res) => {
   const currentBookingsToday = await getTodayBookingCount();
   const slotsFull = currentBookingsToday >= MAX_BOOKINGS_PER_DAY;
   const open = windowOpen && !slotsFull;
-
   let message;
   if (weekOff) {
-    message = "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday).";
+    message = WEEKLY_BREAK_USER_MESSAGE;
   } else if (slotsFull) {
     message = "We're done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.";
   } else if (windowOpen) {
@@ -453,17 +477,16 @@ app.get('/api/booking-status', async (req, res) => {
     slotsFull,
     weekOff: weekOff || undefined,
     message,
-    nextOpening: getNextOpeningTime().toISOString(),
+    nextOpening: getNextOpeningTime().toISOString()
   });
 });
 
-/** Debug: what does the server think? (IST date, Saturday?, weekOff, bookingDate) – use on Render to verify */
+/** Debug: IST date, week-off window, bookingDate – use on Render to verify */
 app.get('/api/status-debug', (req, res) => {
   const istDate = getISTDateString();
-  const saturday = isSaturdayIST();
   res.json({
     istDate,
-    isSaturday: saturday,
+    istDayOfWeek: istMoment().day(),
     maxBookingsPerDay: MAX_BOOKINGS_PER_DAY,
     SATURDAY_OFF,
     weekOff: isWeekOff(),
@@ -471,6 +494,8 @@ app.get('/api/status-debug', (req, res) => {
     open: isBookingWindowOpen(),
     testSaturday9pm: TEST_SATURDAY_9PM,
     serverTime: new Date().toISOString(),
+    timeNow: istMoment().format('YYYY-MM-DD HH:mm:ss'),
+    dayNow: istMoment().format('dddd'),
   });
 });
 
@@ -519,7 +544,7 @@ app.post('/api/book', async (req, res) => {
   if (isWeekOff()) {
     return res.status(403).json({
       success: false,
-      error: "We're on our weekly break. Bookings open again at 9:00 PM IST today (for Sunday).",
+      error: WEEKLY_BREAK_USER_MESSAGE,
       weekOff: true,
     });
   }
@@ -531,7 +556,9 @@ app.post('/api/book', async (req, res) => {
     });
   }
 
-  const currentCount = await getTodayBookingCount();
+  const bookingDate = getBookingDateString();
+
+  const currentCount = await getTodayBookingCount(bookingDate);
   if (currentCount >= MAX_BOOKINGS_PER_DAY) {
     return res.status(403).json({
       success: false,
@@ -547,8 +574,6 @@ app.post('/api/book', async (req, res) => {
       error: 'Please provide name, phone, and service.',
     });
   }
-
-  const bookingDate = getBookingDateString();
 
   try {
     const queueNumber = await appendBookingToSheet({
@@ -616,7 +641,7 @@ app.listen(PORT, () => {
   if (!SPREADSHEET_ID) {
     console.warn('\n*** GOOGLE_SPREADSHEET_ID is not set – bookings will fail. Set it to your Sheet ID (from the URL). ***');
   } else {
-    const tabName = USE_DAILY_SHEETS ? getSheetNameForDate() : SHEET_NAME;
+    const tabName = getTabNameForBookingCycle();
     console.log('Bookings will be written to spreadsheet', SPREADSHEET_ID, 'tab:', tabName);
     (function logServiceAccountEmail() {
       try {
