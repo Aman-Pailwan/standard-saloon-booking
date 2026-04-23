@@ -193,7 +193,6 @@
         }
         form.reset();
         setMinDate();
-        fetchBookingStatus();
         showAcknowledgementModal(msg);
       } else {
         showMessage(data.error || 'Booking failed. Please try again.', 'error');

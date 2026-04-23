@@ -32,6 +32,25 @@ const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 // Max bookings per day; once reached, no more accepted until next day (9:00 PM IST)
 const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '20', 10) || 20;
 
+/** Cache tab titles from spreadsheets.get to cut read quota (short TTL; invalidated on addSheet). */
+let sheetTitlesCache = { titles: null, expiresAt: 0 };
+const SHEET_TITLES_TTL_MS = parseInt(process.env.SHEET_TITLES_CACHE_MS || '60000', 10) || 60000;
+
+function invalidateSheetTitlesCache() {
+  sheetTitlesCache = { titles: null, expiresAt: 0 };
+}
+
+async function getSpreadsheetSheetTitles(sheets) {
+  const now = Date.now();
+  if (sheetTitlesCache.titles && now < sheetTitlesCache.expiresAt) {
+    return sheetTitlesCache.titles;
+  }
+  const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
+  const titles = (meta.data.sheets || []).map((s) => s.properties.title);
+  sheetTitlesCache = { titles, expiresAt: now + SHEET_TITLES_TTL_MS };
+  return titles;
+}
+
 // Weekly break (IST): when true, no bookings from Friday 9:00 PM through Saturday 8:59 PM; opens Saturday 9:00 PM (still uses env name SATURDAY_OFF for compatibility)
 const SATURDAY_OFF = process.env.SATURDAY_OFF === 'true' || process.env.SATURDAY_OFF === '1';
 
@@ -126,18 +145,36 @@ function getTabNameForBookingCycle(bookingDateYmd) {
   return getBookingDateString();
 }
 
+/** A1 range with a quoted sheet title (required for names like 2026-04-23). */
+function sheetRange(tabName, a1) {
+  const safe = String(tabName).replace(/'/g, "''");
+  return `'${safe}'!${a1}`;
+}
+
+/** Queue # from append response, e.g. '2026-04-23'!A4:I4 → 3 (row 1 = header). */
+function queueNumberFromAppendUpdates(appendRes) {
+  const updatedRange =
+    appendRes &&
+    appendRes.data &&
+    appendRes.data.updates &&
+    appendRes.data.updates.updatedRange;
+  if (!updatedRange || typeof updatedRange !== 'string') return 1;
+  const m = updatedRange.match(/![A-Za-z]+(\d+)/);
+  if (!m) return 1;
+  const row = parseInt(m[1], 10);
+  return row > 1 ? row - 1 : 1;
+}
+
 /** Get booking count for the active cycle, or for a fixed YYYY-MM-DD when provided (POST /api/book). */
+/** One values.read per call (no spreadsheets.get) to reduce Sheets read quota. */
 async function getTodayBookingCount(bookingDateYmd) {
   if (!SPREADSHEET_ID) return 0;
   try {
     const sheets = getSheetsClient();
     const tabName = getTabNameForBookingCycle(bookingDateYmd);
-    const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-    const existingTitles = (meta.data.sheets || []).map(s => s.properties.title);
-    if (!existingTitles.includes(tabName)) return 0;
     const countRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${tabName}!A:A`,
+      range: sheetRange(tabName, 'A:A'),
     });
     const rows = countRes.data.values || [];
     const dataRowCount = rows.length <= 1 ? 0 : rows.length - 1;
@@ -185,6 +222,9 @@ async function appendBookingToSheet(booking) {
   const sheets = getSheetsClient();
   // Must match booking.date — never recompute from the clock here (Sheets calls can cross 9 PM IST / midnight).
   const tabName = USE_DAILY_SHEETS ? getSheetNameForDate(booking.date) : SHEET_NAME;
+  const rangeColA = sheetRange(tabName, 'A:A');
+  const rangeHeader = sheetRange(tabName, 'A1:I1');
+  const rangeAppend = sheetRange(tabName, 'A:I');
 
   const bookedAt = toISTString(new Date());
   const row = [
@@ -199,22 +239,33 @@ async function appendBookingToSheet(booking) {
     bookedAt,
   ];
 
-  const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID });
-  const existingTitles = (meta.data.sheets || []).map(s => s.properties.title);
-  const tabExists = existingTitles.includes(tabName);
+  let existingTitles = await getSpreadsheetSheetTitles(sheets);
+  if (!existingTitles.includes(tabName)) {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: tabName } } }],
+      },
+    });
+    invalidateSheetTitlesCache();
+  }
 
-  let dataRowCount = 0;
-  if (tabExists) {
-    try {
-      const countRes = await sheets.spreadsheets.values.get({
-        spreadsheetId: SPREADSHEET_ID,
-        range: `${tabName}!A:A`,
-      });
-      const rows = countRes.data.values || [];
-      dataRowCount = rows.length <= 1 ? 0 : rows.length - 1;
-    } catch (_) {
-      dataRowCount = 0;
-    }
+  const batch = await sheets.spreadsheets.values.batchGet({
+    spreadsheetId: SPREADSHEET_ID,
+    ranges: [rangeColA, rangeHeader],
+  });
+  const vr = batch.data.valueRanges || [];
+  const colA = (vr[0] && vr[0].values) || [];
+  const headerVals = (vr[1] && vr[1].values) || [];
+  let dataRowCount = colA.length <= 1 ? 0 : colA.length - 1;
+
+  if (!headerVals.length) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SPREADSHEET_ID,
+      range: rangeHeader,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [HEADERS] },
+    });
   }
 
   if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
@@ -223,69 +274,29 @@ async function appendBookingToSheet(booking) {
     throw err;
   }
 
-  if (!tabExists) {
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId: SPREADSHEET_ID,
-      requestBody: {
-        requests: [{ addSheet: { properties: { title: tabName } } }],
-      },
-    });
-  }
-
-  const range = `${tabName}!A1:I1`;
-  try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-    });
-    const values = res.data.values;
-    if (!values || values.length === 0) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: SPREADSHEET_ID,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [HEADERS] },
-      });
-    }
-  } catch (e) {
-    if (e.code === 404 || (e.message && e.message.includes('Unable to parse range'))) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: SPREADSHEET_ID,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [HEADERS] },
-      });
-    } else throw e;
-  }
-
-  let queueNumber = dataRowCount + 1;
-  try {
+  if (dataRowCount >= MAX_BOOKINGS_PER_DAY - 1) {
     const countRes = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${tabName}!A:A`,
+      range: rangeColA,
     });
     const rows = countRes.data.values || [];
-    const freshCount = rows.length <= 1 ? 0 : rows.length - 1;
-    queueNumber = freshCount + 1;
-    if (freshCount >= MAX_BOOKINGS_PER_DAY) {
+    dataRowCount = rows.length <= 1 ? 0 : rows.length - 1;
+    if (dataRowCount >= MAX_BOOKINGS_PER_DAY) {
       const err = new Error('We\'re done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.');
       err.code = 'DAILY_LIMIT_REACHED';
       throw err;
     }
-  } catch (e) {
-    if (e.code === 'DAILY_LIMIT_REACHED') throw e;
-    queueNumber = dataRowCount + 1;
   }
 
-  await sheets.spreadsheets.values.append({
+  const appendRes = await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${tabName}!A:I`,
+    range: rangeAppend,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody: { values: [row] },
   });
 
-  return queueNumber;
+  return queueNumberFromAppendUpdates(appendRes);
 }
 
 /** Professional HTML template for booking confirmation email (inline CSS for email clients). */
@@ -613,6 +624,12 @@ app.post('/api/book', async (req, res) => {
       userMessage = 'Server cannot write to your Google Sheet. Share the sheet with the service account email (see credentials.json "client_email") as Editor.';
     } else if (err.code === 404 || (err.message && err.message.includes('Unable to parse range'))) {
       userMessage = 'Google Sheet not found or wrong ID. Check GOOGLE_SPREADSHEET_ID (the long id from the sheet URL).';
+    } else if (
+      err.code === 429 ||
+      (err.message && err.message.toLowerCase().includes('quota exceeded'))
+    ) {
+      userMessage =
+        'Our booking system hit a short-term Google Sheets limit. Please wait a minute and try again, or call us to book.';
     }
     res.status(500).json({
       success: false,
