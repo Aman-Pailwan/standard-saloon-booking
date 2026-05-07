@@ -24,6 +24,24 @@
     }
   }
 
+  function showLobbyModal() {
+    const modal = document.getElementById('lobby-modal');
+    if (!modal) return;
+    modal.hidden = false;
+    setTimeout(() => {
+      modal.classList.add('lobby-modal-visible');
+    }, 10);
+  }
+
+  function hideLobbyModal() {
+    const modal = document.getElementById('lobby-modal');
+    if (!modal) return;
+    modal.classList.remove('lobby-modal-visible');
+    setTimeout(() => {
+      modal.hidden = true;
+    }, 300);
+  }
+
   function showAcknowledgementModal(messageText) {
     const modal = document.getElementById('ack-modal');
     const messageDiv = document.getElementById('ack-modal-message');
@@ -157,14 +175,15 @@
     e.preventDefault();
     clearMessage();
     if (submitBtn) submitBtn.disabled = true;
+    showLobbyModal();
 
     const payload = {
       customerName: form.customerName.value.trim(),
       phone: form.phone.value.trim(),
       email: form.email.value.trim(),
       service: form.service.value,
-      source: form.source ? form.source.value : '',
-      notes: form.notes.value.trim(),
+      source: '',
+      notes: '',
     };
 
     try {
@@ -204,6 +223,7 @@
         showMessage('Network error. Please try again. If deployed, check /api/check to verify credentials.', 'error');
       }
     } finally {
+      hideLobbyModal();
       if (submitBtn) submitBtn.disabled = false;
     }
   });

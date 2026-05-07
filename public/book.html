@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Book Appointment – Standard Hair and Makeup Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    body { font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
   </style>
 </head>
+
 <body class="landing-print-style">
   <header class="site-header print-header">
     <div class="container">
@@ -28,7 +34,8 @@
       <div class="container narrow">
         <div class="page-header-inner">
           <h1>Book your appointment</h1>
-          <p class="sub" id="page-sub">Bookings open daily at 9:00 PM IST. Today only – no advance bookings. Limited slots each day.</p>
+          <p class="sub" id="page-sub">Bookings open daily at 9:00 PM IST. Today only – no advance bookings. Limited
+            slots each day.</p>
           <div id="booking-status" class="booking-status" aria-live="polite"></div>
           <div id="next-slot-countdown" class="next-slot-countdown" aria-live="polite" style="display: none;"></div>
         </div>
@@ -41,7 +48,8 @@
         <div class="form-embed-card">
           <div class="form-embed-card-accent"></div>
           <div class="form-embed-card-inner">
-            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. Complete your details below; responses are saved to our sheet.</p>
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. Complete your
+              details below; responses are saved to our sheet.</p>
             <div class="form-embed-iframe-wrap">
               <iframe id="google-form-iframe" title="Book your appointment" class="google-form-iframe"></iframe>
             </div>
@@ -58,7 +66,8 @@
           <div class="week-off-card-inner">
             <p class="week-off-label">Weekly break</p>
             <h2 class="week-off-title">We’re closed online</h2>
-            <p class="week-off-text">No bookings from <strong>Friday 9:00 PM</strong> to <strong>Saturday 9:00 PM IST</strong>. Bookings open again <strong>Saturday at 9:00 PM IST</strong> (for Sunday’s queue).</p>
+            <p class="week-off-text">No bookings from <strong>Friday 9:00 PM</strong> to <strong>Saturday 9:00 PM
+                IST</strong>. Bookings open again <strong>Saturday at 9:00 PM IST</strong> (for Sunday’s queue).</p>
           </div>
         </div>
       </div>
@@ -70,7 +79,8 @@
           <div class="form-embed-card-accent"></div>
           <div class="form-embed-card-inner">
             <h2 class="booking-form-title">Book your visit</h2>
-            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. We’ll save your details and confirm your slot.</p>
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. We’ll save
+              your details and confirm your slot.</p>
             <form id="booking-form" class="booking-form" novalidate>
               <div class="form-row">
                 <label for="customerName">Full name <span class="required">*</span></label>
@@ -78,12 +88,13 @@
               </div>
               <div class="form-row">
                 <label for="phone">Phone number <span class="required">*</span></label>
-                <input type="tel" id="phone" name="phone" required placeholder="e.g. 07XXX XXXXXX" />
+                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" maxlength="10" placeholder="e.g. 9876543210" title="Please enter exactly 10 digits" />
               </div>
               <div class="form-row">
                 <label for="email">Email address</label>
                 <input type="email" id="email" name="email" placeholder="Add if you want confirmation by email" />
-                <p class="form-field-hint">We’ll email your queue number. Please check spam and add us to your trusted senders.</p>
+                <p class="form-field-hint">We’ll email your queue number. Please check spam and add us to your trusted
+                  senders.</p>
               </div>
               <div class="form-row">
                 <label for="service">Primary service <span class="required">*</span></label>
@@ -98,21 +109,7 @@
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <div class="form-row">
-                <label for="source">How did you hear about us?</label>
-                <select id="source" name="source">
-                  <option value="">Select one</option>
-                  <option value="Friend/Family Referral">Friend/Family Referral</option>
-                  <option value="Online Search/Google">Online Search/Google</option>
-                  <option value="Social Media (Instagram/Facebook)">Social Media (Instagram/Facebook)</option>
-                  <option value="Walk-in/Passed By">Walk-in/Passed By</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="form-row">
-                <label for="notes">Special requests or notes</label>
-                <textarea id="notes" name="notes" rows="2" placeholder="Any preferences or notes"></textarea>
-              </div>
+
               <div class="form-actions">
                 <button type="submit" id="submit-btn" class="btn btn-primary btn-book">Book appointment</button>
               </div>
@@ -123,8 +120,21 @@
       </div>
     </section>
 
+    <!-- Lobby modal – shown while waiting in queue -->
+    <div id="lobby-modal" class="lobby-modal" role="dialog" aria-modal="true" aria-labelledby="lobby-modal-title"
+      hidden>
+      <div class="lobby-modal-backdrop"></div>
+      <div class="lobby-modal-card">
+        <div class="lobby-spinner"></div>
+        <h2 id="lobby-modal-title" class="lobby-modal-title">You are in the queue</h2>
+        <p class="lobby-modal-message">Please do not refresh or close this page. We are securely processing your
+          booking...</p>
+      </div>
+    </div>
+
     <!-- Acknowledgement popup – shown after successful booking; Done sends user home -->
-    <div id="ack-modal" class="ack-modal" role="dialog" aria-modal="true" aria-labelledby="ack-modal-title" aria-describedby="ack-modal-message" hidden>
+    <div id="ack-modal" class="ack-modal" role="dialog" aria-modal="true" aria-labelledby="ack-modal-title"
+      aria-describedby="ack-modal-message" hidden>
       <div class="ack-modal-backdrop"></div>
       <div class="ack-modal-card">
         <h2 id="ack-modal-title" class="ack-modal-title">Booking confirmed</h2>
@@ -138,7 +148,8 @@
     <section class="info info-card-section">
       <div class="container narrow">
         <div class="info-card">
-          <p class="info-text">After you submit the form above, we’ll save your booking and confirm your slot. To change or cancel, please contact us by phone.</p>
+          <p class="info-text">After you submit the form above, we’ll save your booking and confirm your slot. To change
+            or cancel, please contact us by phone.</p>
         </div>
       </div>
     </section>
@@ -158,10 +169,10 @@
 
   <script src="script.js"></script>
   <script>
-    (function() {
+    (function () {
       fetch('/api/config')
-        .then(function(r) { return r.json(); })
-        .then(function(config) {
+        .then(function (r) { return r.json(); })
+        .then(function (config) {
           if (config.useGoogleForm && config.googleFormEmbedUrl) {
             document.getElementById('google-form-section').style.display = 'block';
             document.getElementById('custom-form-section').style.display = 'none';
@@ -169,13 +180,14 @@
             iframe.src = config.googleFormEmbedUrl;
             var sub = document.getElementById('page-sub');
             if (sub) sub.textContent = 'Fill out the form below. Responses are saved to our sheet, just like Google Form + Sheets.';
-            } else if (config.bookingAlwaysOpen) {
+          } else if (config.bookingAlwaysOpen) {
             var sub = document.getElementById('page-sub');
             if (sub) sub.textContent = 'Testing mode: bookings are always open. Choose your date, time, and service.';
           }
         })
-        .catch(function() {});
+        .catch(function () { });
     })();
   </script>
 </body>
+
 </html>

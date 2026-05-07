@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Locate us – Standard Hair and Makeup Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-    body { font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
   </style>
 </head>
+
 <body class="landing-print-style">
   <header class="site-header print-header">
     <div class="container">
@@ -34,11 +40,37 @@
     </section>
 
     <section class="locate-section">
-      <div class="container narrow">
-        <div class="locate-card">
-          <p class="locate-text">Standard Hair and Makeup Studio</p>
-          <a id="maps-link" href="https://maps.app.goo.gl/Hjg9VGEy2oPf77TP7" target="_blank" rel="noopener noreferrer" class="locate-btn">Open in Google Maps</a>
-          <p class="locate-hint">Opens Google Maps in a new tab.</p>
+      <div class="container">
+        <div class="locate-grid">
+          <!-- Info Panel -->
+          <div class="locate-card info-panel">
+            <h2 class="locate-subhead">Location Data</h2>
+            <p class="locate-text" style="margin-bottom: 0.5rem;">Standard Hair and Makeup Studio</p>
+            <p style="color: var(--text-light); margin-bottom: 2.5rem; line-height: 1.6;">Shop No.4, Nageshkar Hall,
+              near Private High School, Mangalwar Peth,<br>Kolhapur, Maharashtra 416012</p>
+            <h2 class="locate-subhead">Hours of Operation</h2>
+            <ul class="locate-hours">
+              <li><span>Monday - Friday</span> <span>10:00 AM - 9:00 PM</span></li>
+              <li><span>Sunday</span> <span>10:00 AM - 9:00 PM</span></li>
+              <li><span>Saturday</span> <span style="color: var(--error);">Closed</span></li>
+            </ul>
+
+            <a id="maps-link" href="https://maps.app.goo.gl/Hjg9VGEy2oPf77TP7" target="_blank" rel="noopener noreferrer"
+              class="btn" style="width: 100%;">Open in Google Maps</a>
+          </div>
+
+          <!-- Map Panel -->
+          <div class="locate-card map-panel">
+            <div class="map-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--aws-orange)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span style="font-family: var(--font-mono); color: var(--text-light); font-size: 0.85rem;">LAT:
+                18.5204&deg; N, LNG: 73.8567&deg; E</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -56,4 +88,5 @@
     </div>
   </footer>
 </body>
+
 </html>

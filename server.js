@@ -30,7 +30,7 @@ const BOOKING_OPEN_MINUTE_IST = 0;
 const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 
 // Max bookings per day; once reached, no more accepted until next day (9:00 PM IST)
-const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '20', 10) || 20;
+const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '18', 10) || 18;
 
 /** Cache tab titles from spreadsheets.get to cut read quota (short TTL; invalidated on addSheet). */
 let sheetTitlesCache = { titles: null, expiresAt: 0 };
@@ -39,6 +39,34 @@ const SHEET_TITLES_TTL_MS = parseInt(process.env.SHEET_TITLES_CACHE_MS || '60000
 function invalidateSheetTitlesCache() {
   sheetTitlesCache = { titles: null, expiresAt: 0 };
 }
+
+class Mutex {
+  constructor() {
+    this.locked = false;
+    this.queue = [];
+  }
+  lock() {
+    return new Promise(resolve => {
+      if (this.locked) {
+        this.queue.push(resolve);
+      } else {
+        this.locked = true;
+        resolve();
+      }
+    });
+  }
+  unlock() {
+    if (this.queue.length > 0) {
+      const resolve = this.queue.shift();
+      resolve();
+    } else {
+      this.locked = false;
+    }
+  }
+}
+const bookingMutex = new Mutex();
+let optimisticBookingCount = 0;
+let optimisticBookingDate = '';
 
 async function getSpreadsheetSheetTitles(sheets) {
   const now = Date.now();
@@ -90,23 +118,21 @@ function getISTTime() {
   return { hour: m.hour(), minute: m.minute() };
 }
 
-/** Date we are currently accepting bookings for (IST). With SATURDAY_OFF, from Saturday 9 PM we book for Sunday; otherwise from 9 PM we book for “today’s” tab until the next 9 PM. */
+/** Date we are currently accepting bookings for (IST). Always returns the date of the appointment. Bookings open at 9 PM for the next day. */
 function getBookingDateString() {
   const now = istMoment();
-  const istDateStr = now.format('YYYY-MM-DD');
   const hour = now.hour();
   const minute = now.minute();
-  // dayjs: 0=Sun … 6=Sat — after weekly break ends Sat 9 PM, first cycle uses Sunday’s sheet
-  const saturdayAtOrAfterOpen =
-    now.day() === 6 &&
-    (hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST));
-  if (SATURDAY_OFF && saturdayAtOrAfterOpen) {
+  
+  const afterOpen = hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST);
+  
+  if (afterOpen) {
+    // 9 PM to Midnight: booking for tomorrow
     return now.add(1, 'day').format('YYYY-MM-DD');
+  } else {
+    // Midnight to 9 PM: booking for today
+    return now.format('YYYY-MM-DD');
   }
-  if (hour > BOOKING_OPEN_HOUR_IST || (hour === BOOKING_OPEN_HOUR_IST && minute >= BOOKING_OPEN_MINUTE_IST)) {
-    return istDateStr;
-  }
-  return now.subtract(1, 'day').format('YYYY-MM-DD');
 }
 
 /**
@@ -569,8 +595,12 @@ app.post('/api/book', async (req, res) => {
 
   const bookingDate = getBookingDateString();
 
-  const currentCount = await getTodayBookingCount(bookingDate);
-  if (currentCount >= MAX_BOOKINGS_PER_DAY) {
+  if (optimisticBookingDate !== bookingDate) {
+    optimisticBookingDate = bookingDate;
+    optimisticBookingCount = 0;
+  }
+
+  if (optimisticBookingCount >= MAX_BOOKINGS_PER_DAY) {
     return res.status(403).json({
       success: false,
       error: "We're done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.",
@@ -586,7 +616,18 @@ app.post('/api/book', async (req, res) => {
     });
   }
 
+  await bookingMutex.lock();
   try {
+    const currentCount = await getTodayBookingCount(bookingDate);
+    optimisticBookingCount = currentCount;
+    if (currentCount >= MAX_BOOKINGS_PER_DAY) {
+      return res.status(403).json({
+        success: false,
+        error: "We're done for today. All slots are full. Bookings open again at 9:00 PM IST tomorrow.",
+        slotsFull: true,
+      });
+    }
+
     const queueNumber = await appendBookingToSheet({
       date: bookingDate,
       time: time || '',
@@ -597,6 +638,8 @@ app.post('/api/book', async (req, res) => {
       source: (source || '').trim(),
       notes: (notes || '').trim(),
     });
+
+    optimisticBookingCount = currentCount + 1;
 
     const bookedAt = new Date().toISOString();
     res.json({
@@ -635,6 +678,8 @@ app.post('/api/book', async (req, res) => {
       success: false,
       error: userMessage,
     });
+  } finally {
+    bookingMutex.unlock();
   }
 });
 
