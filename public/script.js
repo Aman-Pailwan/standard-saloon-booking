@@ -132,14 +132,31 @@
       const res = await fetch('/api/booking-status');
       const data = await res.json();
       var weekOffSection = document.getElementById('week-off-section');
+      var emergencySection = document.getElementById('emergency-closure-section');
+      var emergencyText = document.getElementById('emergency-closure-text');
       var formSection = document.getElementById('custom-form-section');
       var formEl = document.getElementById('booking-form');
 
-      if (data.weekOff) {
+      if (data.emergencyClosure) {
         statusEl.textContent = '';
         statusEl.className = 'booking-status week-off-header';
         var headerSection = document.querySelector('.book-page-header');
         if (headerSection) headerSection.classList.add('has-week-off');
+        if (emergencySection) {
+          emergencySection.style.display = 'block';
+          if (emergencyText) emergencyText.textContent = data.message;
+        }
+        if (weekOffSection) weekOffSection.style.display = 'none';
+        if (formSection) formSection.style.display = 'none';
+        var googleFormSection = document.getElementById('google-form-section');
+        if (googleFormSection) googleFormSection.style.display = 'none';
+        stopCountdown();
+      } else if (data.weekOff) {
+        statusEl.textContent = '';
+        statusEl.className = 'booking-status week-off-header';
+        var headerSection = document.querySelector('.book-page-header');
+        if (headerSection) headerSection.classList.add('has-week-off');
+        if (emergencySection) emergencySection.style.display = 'none';
         if (weekOffSection) weekOffSection.style.display = 'block';
         if (formSection) formSection.style.display = 'none';
         var googleFormSection = document.getElementById('google-form-section');
@@ -150,6 +167,7 @@
         statusEl.className = 'booking-status ' + (data.slotsFull ? 'full' : data.open ? 'open' : 'closed');
         var headerSection = document.querySelector('.book-page-header');
         if (headerSection) headerSection.classList.remove('has-week-off');
+        if (emergencySection) emergencySection.style.display = 'none';
         if (weekOffSection) weekOffSection.style.display = 'none';
         if (formSection) formSection.style.display = '';
         if (data.slotsFull) {

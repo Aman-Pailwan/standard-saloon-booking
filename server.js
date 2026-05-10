@@ -32,6 +32,9 @@ const USE_DAILY_SHEETS = process.env.USE_DAILY_SHEETS !== 'false';
 // Max bookings per day; once reached, no more accepted until next day (9:00 PM IST)
 const MAX_BOOKINGS_PER_DAY = parseInt(process.env.MAX_BOOKINGS_PER_DAY || '18', 10) || 18;
 
+// Emergency closure message to disable bookings and show a notice on the frontend
+const EMERGENCY_CLOSURE_MESSAGE = process.env.EMERGENCY_CLOSURE_MESSAGE || null;
+
 /** Cache tab titles from spreadsheets.get to cut read quota (short TTL; invalidated on addSheet). */
 let sheetTitlesCache = { titles: null, expiresAt: 0 };
 const SHEET_TITLES_TTL_MS = parseInt(process.env.SHEET_TITLES_CACHE_MS || '60000', 10) || 60000;
@@ -493,6 +496,16 @@ app.get('/api/config', (req, res) => {
 });
 
 app.get('/api/booking-status', async (req, res) => {
+  if (EMERGENCY_CLOSURE_MESSAGE) {
+    return res.json({
+      open: false,
+      slotsFull: false,
+      emergencyClosure: true,
+      message: EMERGENCY_CLOSURE_MESSAGE,
+      nextOpening: null
+    });
+  }
+
   const weekOff = isWeekOff();
   const windowOpen = !weekOff && isBookingWindowOpen();
   const currentBookingsToday = await getTodayBookingCount();
@@ -569,6 +582,13 @@ app.get('/api/check', async (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/book', async (req, res) => {
+  if (EMERGENCY_CLOSURE_MESSAGE) {
+    return res.status(403).json({
+      success: false,
+      error: EMERGENCY_CLOSURE_MESSAGE,
+      emergencyClosure: true,
+    });
+  }
   if (GOOGLE_FORM_EMBED_URL) {
     return res.status(400).json({ success: false, error: 'Bookings use Google Form; submit there.' });
   }

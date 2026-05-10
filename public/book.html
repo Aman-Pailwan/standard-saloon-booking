@@ -58,6 +58,20 @@
       </div>
     </section>
 
+    <!-- Shown when EMERGENCY_CLOSURE_MESSAGE is set in env -->
+    <section id="emergency-closure-section" class="week-off-section" style="display: none;" aria-live="polite">
+      <div class="container form-container">
+        <div class="week-off-card">
+          <div class="week-off-card-accent" style="background: #eab308;"></div>
+          <div class="week-off-card-inner">
+            <p class="week-off-label" style="color: #ca8a04;">Notice</p>
+            <h2 class="week-off-title">Bookings Currently Closed</h2>
+            <p class="week-off-text" id="emergency-closure-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Shown when SATURDAY_OFF and IST is in the weekly break (Fri 9 PM – Sat 9 PM) -->
     <section id="week-off-section" class="week-off-section" style="display: none;" aria-live="polite">
       <div class="container form-container">
