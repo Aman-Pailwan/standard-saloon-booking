@@ -4,27 +4,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Book your appointment at Standard Hair and Makeup Studio, Kolhapur. Hair, beauty, spa and bridal services." />
   <title>Book Appointment – Standard Hair and Makeup Studio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-    }
-  </style>
 </head>
 
-<body class="landing-print-style">
-  <header class="site-header print-header">
+<body>
+  <!-- Festival Notice Bar (Passing Line) -->
+  <div class="festival-notice-bar" role="region" aria-label="Ganpati Festival Advance Booking Notice">
+    <div class="festival-ticker-row">
+      <div class="festival-ticker-track">
+        <div class="festival-ticker-content">
+          <span class="festival-badge">✨ Ganpati Update</span>
+          <span class="festival-text">Advance bookings for salon appointments will open soon. We will be sharing the booking link on <strong>5th September</strong>!</span>
+          <span class="ticker-divider">✦</span>
+          <span class="festival-badge festival-badge-mr">🌺 गणेशोत्सव विशेष</span>
+          <span class="festival-text marathi-font">गणेशोत्सवानिमित्त सलून अपॉइंटमेंटसाठी ॲडव्हान्स बुकिंग केले जाईल. बुकिंगची लिंक <strong>५ सप्टेंबर</strong> रोजी शेअर केली जाईल!</span>
+          <span class="ticker-divider">✦</span>
+        </div>
+        <div class="festival-ticker-content" aria-hidden="true">
+          <span class="festival-badge">✨ Ganpati Update</span>
+          <span class="festival-text">Advance bookings for salon appointments will open soon. We will be sharing the booking link on <strong>5th September</strong>!</span>
+          <span class="ticker-divider">✦</span>
+          <span class="festival-badge festival-badge-mr">🌺 गणेशोत्सव विशेष</span>
+          <span class="festival-text marathi-font">गणेशोत्सवानिमित्त सलून अपॉइंटमेंटसाठी ॲडव्हान्स बुकिंग केले जाईल. बुकिंगची लिंक <strong>५ सप्टेंबर</strong> रोजी शेअर केली जाईल!</span>
+          <span class="ticker-divider">✦</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
     <div class="container">
       <a href="/" class="logo-fallback print-logo">Standard Hair and Makeup Studio</a>
       <nav class="header-nav">
-        <a href="/book" class="nav-link print-nav">Book</a>
+        <a href="/" class="nav-link print-nav">Home</a>
         <a href="/locate" class="nav-link print-nav">Locate us</a>
+        <a href="/book" class="nav-link nav-cta print-nav">Book Appointment</a>
       </nav>
     </div>
   </header>
@@ -33,9 +49,8 @@
     <section class="page-header book-page-header">
       <div class="container narrow">
         <div class="page-header-inner">
-          <h1>Book your appointment</h1>
-          <p class="sub" id="page-sub">Bookings open daily at 9:00 PM IST. Today only – no advance bookings. Limited
-            slots each day.</p>
+          <h1>Book Appointment</h1>
+          <p class="sub" id="page-sub">Bookings open at 9:00 PM daily. For today's queue only. Limited slots.</p>
           <div id="booking-status" class="booking-status" aria-live="polite"></div>
           <div id="next-slot-countdown" class="next-slot-countdown" aria-live="polite" style="display: none;"></div>
         </div>
@@ -48,8 +63,7 @@
         <div class="form-embed-card">
           <div class="form-embed-card-accent"></div>
           <div class="form-embed-card-inner">
-            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. Complete your
-              details below; responses are saved to our sheet.</p>
+            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. Complete your details below; responses are saved to our sheet.</p>
             <div class="form-embed-iframe-wrap">
               <iframe id="google-form-iframe" title="Book your appointment" class="google-form-iframe"></iframe>
             </div>
@@ -62,9 +76,9 @@
     <section id="emergency-closure-section" class="week-off-section" style="display: none;" aria-live="polite">
       <div class="container form-container">
         <div class="week-off-card">
-          <div class="week-off-card-accent" style="background: #eab308;"></div>
+          <div class="week-off-card-accent"></div>
           <div class="week-off-card-inner">
-            <p class="week-off-label" style="color: #ca8a04;">Notice</p>
+            <p class="week-off-label">Notice</p>
             <h2 class="week-off-title">Bookings Currently Closed</h2>
             <p class="week-off-text" id="emergency-closure-text"></p>
           </div>
@@ -79,9 +93,8 @@
           <div class="week-off-card-accent"></div>
           <div class="week-off-card-inner">
             <p class="week-off-label">Weekly break</p>
-            <h2 class="week-off-title">We’re closed online</h2>
-            <p class="week-off-text">No bookings from <strong>Friday 9:00 PM</strong> to <strong>Saturday 9:00 PM
-                IST</strong>. Bookings open again <strong>Saturday at 9:00 PM IST</strong> (for Sunday’s queue).</p>
+            <h2 class="week-off-title">We're closed online</h2>
+            <p class="week-off-text">No bookings from <strong>Friday 9:00 PM</strong> to <strong>Saturday 9:00 PM IST</strong>. Bookings open again <strong>Saturday at 9:00 PM IST</strong> (for Sunday's queue).</p>
           </div>
         </div>
       </div>
@@ -92,26 +105,26 @@
         <div class="form-embed-card custom-form-card booking-form-card">
           <div class="form-embed-card-accent"></div>
           <div class="form-embed-card-inner">
-            <h2 class="booking-form-title">Book your visit</h2>
-            <p class="form-embed-intro">Bookings are for <strong>today only</strong>. No advance bookings. We’ll save
-              your details and confirm your slot.</p>
+            <h2 class="booking-form-title">Fill in your details</h2>
+            <p class="form-embed-intro">Appointments are for <strong>today only</strong>. Fill the form below and we’ll confirm your slot.</p>
             <form id="booking-form" class="booking-form" novalidate>
-              <div class="form-row">
-                <label for="customerName">Full name <span class="required">*</span></label>
-                <input type="text" id="customerName" name="customerName" required placeholder="Your name" />
+              <div class="form-grid-2">
+                <div class="form-row">
+                  <label for="customerName">Name <span class="required">*</span></label>
+                  <input type="text" id="customerName" name="customerName" required placeholder="Enter your name" />
+                </div>
+                <div class="form-row">
+                  <label for="phone">Phone <span class="required">*</span></label>
+                  <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" maxlength="10" placeholder="10-digit number" title="Please enter exactly 10 digits" />
+                </div>
               </div>
               <div class="form-row">
-                <label for="phone">Phone number <span class="required">*</span></label>
-                <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}" maxlength="10" placeholder="e.g. 9876543210" title="Please enter exactly 10 digits" />
+                <label for="email">Email <span class="form-optional">(optional)</span></label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" />
+                <p class="form-field-hint">We’ll send your queue number to this email.</p>
               </div>
               <div class="form-row">
-                <label for="email">Email address</label>
-                <input type="email" id="email" name="email" placeholder="Add if you want confirmation by email" />
-                <p class="form-field-hint">We’ll email your queue number. Please check spam and add us to your trusted
-                  senders.</p>
-              </div>
-              <div class="form-row">
-                <label for="service">Primary service <span class="required">*</span></label>
+                <label for="service">Service <span class="required">*</span></label>
                 <select id="service" name="service" required>
                   <option value="">Choose a service</option>
                   <option value="Hair Services (Cut, Color, Styling)">Hair Services (Cut, Color, Styling)</option>
@@ -125,7 +138,7 @@
               </div>
 
               <div class="form-actions">
-                <button type="submit" id="submit-btn" class="btn btn-primary btn-book">Book appointment</button>
+                <button type="submit" id="submit-btn" class="btn btn-primary btn-book">Book Appointment</button>
               </div>
               <div id="form-message" class="form-message booking-form-message" aria-live="polite"></div>
             </form>
@@ -139,10 +152,8 @@
       hidden>
       <div class="lobby-modal-backdrop"></div>
       <div class="lobby-modal-card">
-        <div class="lobby-spinner"></div>
-        <h2 id="lobby-modal-title" class="lobby-modal-title">You are in the queue</h2>
-        <p class="lobby-modal-message">Please do not refresh or close this page. We are securely processing your
-          booking...</p>
+        <h2 id="lobby-modal-title" class="ack-modal-title">You are in the queue</h2>
+        <p class="ack-modal-message">Please do not refresh or close this page. We are securely processing your booking...</p>
       </div>
     </div>
 
@@ -158,15 +169,6 @@
         </div>
       </div>
     </div>
-
-    <section class="info info-card-section">
-      <div class="container narrow">
-        <div class="info-card">
-          <p class="info-text">After you submit the form above, we’ll save your booking and confirm your slot. To change
-            or cancel, please contact us by phone.</p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer print-footer">

@@ -3,65 +3,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Standard Hair and Makeup Studio – Book</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <meta name="description" content="Standard Hair and Makeup Studio, Kolhapur – Professional hair, beauty, spa, and bridal makeup services. Book your appointment today." />
+  <title>Standard Hair and Makeup Studio – Kolhapur</title>
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    body { font-family: 'Inter', -apple-system, sans-serif; }
-  </style>
 </head>
-<body class="landing-print-style">
-  <header class="site-header print-header">
+<body>
+  <!-- Festival Notice Bar (Passing Line) -->
+  <div class="festival-notice-bar" role="region" aria-label="Ganpati Festival Advance Booking Notice">
+    <div class="festival-ticker-row">
+      <div class="festival-ticker-track">
+        <div class="festival-ticker-content">
+          <span class="festival-badge">✨ Ganpati Update</span>
+          <span class="festival-text">Advance bookings for salon appointments will open soon. We will be sharing the booking link on <strong>5th September</strong>!</span>
+          <span class="ticker-divider">✦</span>
+          <span class="festival-badge festival-badge-mr">🌺 गणेशोत्सव विशेष</span>
+          <span class="festival-text marathi-font">गणेशोत्सवानिमित्त सलून अपॉइंटमेंटसाठी ॲडव्हान्स बुकिंग केले जाईल. बुकिंगची लिंक <strong>५ सप्टेंबर</strong> रोजी शेअर केली जाईल!</span>
+          <span class="ticker-divider">✦</span>
+        </div>
+        <div class="festival-ticker-content" aria-hidden="true">
+          <span class="festival-badge">✨ Ganpati Update</span>
+          <span class="festival-text">Advance bookings for salon appointments will open soon. We will be sharing the booking link on <strong>5th September</strong>!</span>
+          <span class="ticker-divider">✦</span>
+          <span class="festival-badge festival-badge-mr">🌺 गणेशोत्सव विशेष</span>
+          <span class="festival-text marathi-font">गणेशोत्सवानिमित्त सलून अपॉइंटमेंटसाठी ॲडव्हान्स बुकिंग केले जाईल. बुकिंगची लिंक <strong>५ सप्टेंबर</strong> रोजी शेअर केली जाईल!</span>
+          <span class="ticker-divider">✦</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
     <div class="container">
       <a href="/" class="logo-fallback print-logo">Standard Hair and Makeup Studio</a>
       <nav class="header-nav">
-        <a href="/book" class="nav-link print-nav">Book</a>
+        <a href="/" class="nav-link print-nav">Home</a>
         <a href="/locate" class="nav-link print-nav">Locate us</a>
+        <a href="/book" class="nav-link nav-cta print-nav">Book Appointment</a>
       </nav>
     </div>
   </header>
 
   <main>
+    <!-- HERO -->
     <section class="landing-hero print-hero">
       <div class="container container-narrow hero-content">
-        <div class="print-rule print-rule-top"></div>
-        <h1 class="print-title">Standard Hair and Makeup Studio</h1>
+        <h1 class="print-title">Standard Hair and<br>Makeup Studio</h1>
         <p class="print-subtitle">Hair · Beauty · Makeup · Spa</p>
-        <div class="print-rule"></div>
-        <p class="print-tagline">Book your visit for today. We open for bookings at 9:00 PM IST daily. No advance bookings. Limited slots each day.</p>
-        <a href="/book" class="btn print-btn hero-cta-btn">Book appointment</a>
-        <div class="print-rule print-rule-bottom"></div>
+        <p class="print-tagline">Professional hair, beauty & bridal makeup services in Kolhapur. Book your slot online — we open for bookings at 9 PM daily.</p>
+        <a href="/book" class="btn print-btn hero-cta-btn">Book Appointment</a>
       </div>
     </section>
 
+    <!-- ABOUT -->
+    <section class="about-section">
+      <div class="container">
+        <div class="about-grid">
+          <div class="about-text">
+            <span class="section-id">About Us</span>
+            <h2 class="about-title">Your Go-To Salon in Kolhapur</h2>
+            <p class="about-desc">
+              We're based in Mangalwar Peth, Kolhapur. Whether it's a fresh haircut, 
+              a facial, spa session, or bridal makeup — we've got you covered. 
+              Walk in or book online, limited slots daily.
+            </p>
+            <a href="/book" class="btn btn-outline">Book Now</a>
+          </div>
+          <div class="about-visual">
+            <div class="about-visual-icon">✂️</div>
+            <p class="about-visual-text">"Looking good, feeling great."</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
     <section class="salon-features print-features">
-      <div class="container container-narrow">
-        <h2 class="print-heading">Services</h2>
+      <div class="container">
+        <div class="section-title-block">
+          <span class="section-id">What We Offer</span>
+          <h2 class="h2-title print-heading">Our Services</h2>
+        </div>
         <ul class="print-services print-services-grid">
-          <li><span class="service-dot"></span> Hair — Cut, colour, styling</li>
-          <li><span class="service-dot"></span> Beauty — Facial</li>
-          <li><span class="service-dot"></span> Spa &amp; massage</li>
-          <li><span class="service-dot"></span> Bridal &amp; party makeup</li>
+          <li>
+            <div class="service-dot">💇</div>
+            <span class="service-name">Hair</span>
+            <span class="service-desc">Haircut, colour, styling & hair treatments</span>
+          </li>
+          <li>
+            <div class="service-dot">🧖</div>
+            <span class="service-name">Beauty</span>
+            <span class="service-desc">Facial, cleanup & skincare</span>
+          </li>
+          <li>
+            <div class="service-dot">💆</div>
+            <span class="service-name">Spa & Massage</span>
+            <span class="service-desc">Relaxing spa & body massage</span>
+          </li>
+          <li>
+            <div class="service-dot">💄</div>
+            <span class="service-name">Bridal & Party</span>
+            <span class="service-desc">Bridal, party & occasion makeup</span>
+          </li>
         </ul>
-        <div class="print-rule"></div>
       </div>
     </section>
 
+    <!-- CTA BANNER -->
     <section class="landing-cta print-cta">
       <div class="container container-narrow">
-        <p class="print-cta-text">Reserve your slot for today.</p>
-        <a href="/book" class="print-cta-link">Book appointment</a>
+        <p class="print-cta-text">Ready to book your appointment?</p>
+        <p class="cta-sub">Bookings open every day at 9:00 PM. Limited slots available.</p>
+        <a href="/book" class="btn btn-white hero-cta-btn">Book Now</a>
       </div>
     </section>
   </main>
 
   <footer class="site-footer print-footer">
     <div class="container">
-      <div class="print-rule"></div>
       <p class="print-footer-text">Standard Hair and Makeup Studio · Bookings open at 9:00 PM IST · Today only</p>
       <div class="footer-links">
+        <a href="/" class="print-footer-link">Home</a>
         <a href="/book" class="print-footer-link">Book</a>
         <a href="/locate" class="print-footer-link">Locate us</a>
       </div>
