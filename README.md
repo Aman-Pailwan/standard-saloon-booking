@@ -121,6 +121,13 @@ No API keys or service account. Responses go to your Sheet via Google’s built-
    export BOOKING_ALWAYS_OPEN="true"
    ```
 
+   **Stop accepting website bookings / Closure Notice:** To disable accepting bookings on the website form and show a custom message to visitors (e.g. when switching to advance festival bookings):
+
+   ```bash
+   export EMERGENCY_CLOSURE_MESSAGE="Advance bookings are now open via our festival booking form. Regular website bookings are currently paused."
+   ```
+
+
 ### 3. Run the server
 
 ```bash
