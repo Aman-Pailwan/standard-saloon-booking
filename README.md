@@ -124,7 +124,7 @@ No API keys or service account. Responses go to your Sheet via Google’s built-
    **Stop accepting website bookings / Closure Notice:** To disable accepting bookings on the website form and show a custom message to visitors (e.g. when switching to advance festival bookings):
 
    ```bash
-   export EMERGENCY_CLOSURE_MESSAGE="Advance bookings are now open via our festival booking form. Regular website bookings are currently paused."
+   export EMERGENCY_CLOSURE_MESSAGE="Bookings are temporarily paused. We will reopen at 9:00 PM IST."
    ```
 
 

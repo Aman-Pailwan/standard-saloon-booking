@@ -564,6 +564,55 @@ img {
 }
 
 /* ==========================================================================
+   Notice Section (Standalone, uniform layout)
+   ========================================================================== */
+.notice-section {
+  padding: 5rem 0;
+  text-align: center;
+  background-color: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+
+.notice-content {
+  max-width: 680px;
+}
+
+.notice-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.35;
+  margin-bottom: 1.2rem;
+}
+
+.notice-lead {
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  line-height: 1.85;
+  max-width: 580px;
+  margin: 0 auto 0.9rem auto;
+}
+
+.notice-text {
+  font-size: 0.98rem;
+  color: var(--text-body);
+  line-height: 1.8;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.notice-text strong {
+  color: var(--accent-brown-dark);
+  background: rgba(196, 169, 125, 0.2);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
    About / Intro Section
    ========================================================================== */
 .about-section {
