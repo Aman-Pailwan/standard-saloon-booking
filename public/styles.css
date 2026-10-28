@@ -158,7 +158,7 @@ img {
 .festival-ticker-track {
   display: flex;
   width: max-content;
-  animation: festivalTicker 32s linear infinite;
+  animation: festivalTicker 38s linear infinite;
   cursor: default;
 }
 
@@ -610,6 +610,340 @@ img {
   padding: 0.12rem 0.45rem;
   border-radius: 4px;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   Diwali Festival Advance Booking Notice (Clean & Professional)
+   ========================================================================== */
+.diwali-notice-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+}
+
+.diwali-notice-accent {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-brown-light), var(--accent-brown), var(--accent-brown-light));
+}
+
+.diwali-notice-content {
+  padding: 3rem 2.8rem;
+}
+
+.notice-kicker {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-brown);
+  margin-bottom: 0.75rem;
+}
+
+.notice-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.25;
+  margin-bottom: 0.4rem;
+}
+
+.notice-subhead {
+  font-size: 0.96rem;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.notice-policy-box {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1.2fr;
+  align-items: center;
+  background: var(--bg-ivory);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1rem;
+  margin-bottom: 1.8rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.policy-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0 0.8rem;
+}
+
+.policy-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--accent-brown);
+}
+
+.policy-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.35;
+}
+
+.policy-value small {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--error);
+  margin-top: 0.15rem;
+}
+
+.policy-divider {
+  width: 1px;
+  height: 40px;
+  background-color: var(--border-warm);
+  margin: 0 auto;
+}
+
+.notice-body {
+  font-size: 1rem;
+  color: var(--text-body);
+  line-height: 1.75;
+  max-width: 620px;
+  margin: 0 auto 1.8rem;
+}
+
+.notice-body strong {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.notice-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.6rem;
+}
+
+.btn-diwali-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background-color: var(--accent-brown);
+  color: var(--text-white) !important;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.98rem;
+  letter-spacing: 0.4px;
+  padding: 0.95rem 2.2rem;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-btn);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.btn-diwali-cta:hover {
+  background-color: var(--accent-brown-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(139, 111, 71, 0.32);
+  color: var(--text-white) !important;
+  text-decoration: none;
+}
+
+.btn-diwali-cta .btn-arrow {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.btn-diwali-cta:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+.notice-form-url {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.notice-form-url a {
+  color: var(--accent-brown);
+  text-decoration: underline;
+}
+
+.notice-marathi-note {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  border-top: 1px solid var(--border-light);
+  padding-top: 1.3rem;
+  margin: 0 auto;
+  max-width: 580px;
+}
+
+/* Diwali Hero Secondary Button */
+.diwali-hero-btn {
+  border-color: var(--accent-brown);
+  color: var(--accent-brown-dark);
+  background-color: transparent;
+}
+
+.diwali-hero-btn:hover {
+  background-color: var(--accent-brown);
+  color: #ffffff !important;
+}
+
+/* Booking Page Diwali Notice Card */
+.diwali-advance-card-section {
+  padding: 1.5rem 0 0.5rem;
+  background-color: var(--bg-cream);
+}
+
+.diwali-book-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+
+.diwali-book-card-accent {
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-brown-light), var(--accent-brown), var(--accent-brown-light));
+}
+
+.diwali-book-card-inner {
+  padding: 2.2rem 2.4rem;
+}
+
+.diwali-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.diwali-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.diwali-tag-badge {
+  background: rgba(139, 111, 71, 0.12);
+  color: var(--accent-brown-dark);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 0.22rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.diwali-tag-mr {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.diwali-book-title {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.6rem;
+}
+
+.diwali-book-desc {
+  font-size: 0.98rem;
+  color: var(--text-body);
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+}
+
+.diwali-policy-alert {
+  background: rgba(211, 93, 93, 0.08);
+  border-left: 3px solid var(--error);
+  padding: 0.85rem 1.1rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 1.2rem;
+  font-size: 0.92rem;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.diwali-policy-alert strong {
+  color: #a33838;
+}
+
+.diwali-time-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  background: var(--bg-ivory);
+  border: 1px solid var(--border-warm);
+  padding: 0.95rem 1.2rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.4rem;
+}
+
+.callout-heading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--accent-brown);
+  margin-bottom: 0.2rem;
+}
+
+.callout-time {
+  font-size: 0.96rem;
+  color: var(--text-dark);
+  line-height: 1.45;
+}
+
+.callout-time strong {
+  color: var(--accent-brown-dark);
+}
+
+.callout-time-mr {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.diwali-book-cta-row {
+  margin-bottom: 1.2rem;
+}
+
+.diwali-w100 {
+  width: 100%;
+}
+
+.diwali-book-divider {
+  text-align: center;
+  position: relative;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px dashed var(--border-light);
+}
+
+.diwali-book-divider span {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 /* ==========================================================================
@@ -1391,4 +1725,96 @@ img {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+
+  .diwali-notice-content,
+  .diwali-book-card-inner {
+    padding: 2rem 1.4rem;
+  }
+
+  .notice-policy-box {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1.1rem;
+  }
+
+  .policy-divider {
+    width: 60px;
+    height: 1px;
+    margin: 0.3rem auto;
+  }
+
+  .btn-diwali-cta {
+    width: 100%;
+    padding: 0.9rem 1.4rem;
+  }
 }
+
+/* ==========================================================================
+   Diwali Firecrackers Animation Overlay & Toggle Button
+   ========================================================================== */
+#fireworks-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 95;
+}
+
+.fireworks-toggle-btn {
+  position: fixed;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  z-index: 105;
+  background: rgba(44, 36, 32, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(245, 217, 138, 0.45);
+  color: #f5d98a;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  user-select: none;
+}
+
+.fireworks-toggle-btn strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.fireworks-toggle-btn:hover {
+  background: rgba(44, 36, 32, 0.96);
+  border-color: #f5d98a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 217, 138, 0.3);
+}
+
+.fireworks-toggle-btn.is-off {
+  opacity: 0.65;
+  color: #c4b5a5;
+  border-color: rgba(196, 169, 125, 0.2);
+}
+
+.fireworks-toggle-btn.is-off:hover {
+  opacity: 1;
+}
+
+@media (max-width: 520px) {
+  .fireworks-toggle-btn {
+    bottom: 0.8rem;
+    right: 0.8rem;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
+  }
+}
+
